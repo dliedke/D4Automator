@@ -33,6 +33,8 @@ namespace D4Automator
         private const int MOUSEEVENTF_LEFTUP = 0x0004;
         private const int MOUSEEVENTF_RIGHTDOWN = 0x0008;
         private const int MOUSEEVENTF_RIGHTUP = 0x0010;
+        private const int MOUSEEVENTF_MIDDLEDOWN = 0x0020;
+        private const int MOUSEEVENTF_MIDDLEUP = 0x0040;
         private const int HOTKEY_ID = 9000;
         private const uint VK_F5 = 0x74;
 
@@ -46,10 +48,18 @@ namespace D4Automator
         {
             InitializeComponent();
             InitializeSettings();
+            InitializeKeyMappings();
             RegisterGlobalHotkey();
             ApplyDarkMode();
             AttachEventHandlers();
             SetFormTitle();
+            UpdateLabels();
+        }
+
+        private void InitializeKeyMappings()
+        {
+            keyMappings = new Dictionary<string, Action>();
+            UpdateKeyMappings();
         }
 
         private void AttachEventHandlers()
@@ -58,8 +68,8 @@ namespace D4Automator
             nudSkill2.ValueChanged += nudSkill2_ValueChanged;
             nudSkill3.ValueChanged += nudSkill3_ValueChanged;
             nudSkill4.ValueChanged += nudSkill4_ValueChanged;
-            nudRightClick.ValueChanged += nudRightClick_ValueChanged;
-            nudLeftClick.ValueChanged += nudLeftClick_ValueChanged;
+            nudPrimaryAttack.ValueChanged += nudRightClick_ValueChanged;
+            nudSecondaryAttack.ValueChanged += nudLeftClick_ValueChanged;
             nudPotion.ValueChanged += nudPotion_ValueChanged;
             nudDodge.ValueChanged += nudDodge_ValueChanged;
         }
@@ -95,8 +105,8 @@ namespace D4Automator
                 Skill2Delay = 3000,
                 Skill3Delay = 3000,
                 Skill4Delay = 3000,
-                RightClickDelay = 400,
-                LeftClickDelay = 400,
+                PrimaryAttackDelay = 400,
+                SecondaryAttackDelay = 400,
                 PotionDelay = 2000,
                 DodgeDelay = 0
             };
@@ -111,6 +121,8 @@ namespace D4Automator
             {
                 settings = (Settings)serializer.Deserialize(stream);
             }
+            UpdateKeyMappings();
+            UpdateLabels(); // Add this line
         }
 
         private void SaveSettings()
@@ -128,10 +140,54 @@ namespace D4Automator
             nudSkill2.Value = settings.Skill2Delay;
             nudSkill3.Value = settings.Skill3Delay;
             nudSkill4.Value = settings.Skill4Delay;
-            nudRightClick.Value = settings.RightClickDelay;
-            nudLeftClick.Value = settings.LeftClickDelay;
+            nudPrimaryAttack.Value = settings.PrimaryAttackDelay;
+            nudSecondaryAttack.Value = settings.SecondaryAttackDelay;
             nudPotion.Value = settings.PotionDelay;
             nudDodge.Value = settings.DodgeDelay;
+        }
+
+        private void UpdateLabels()
+        {
+            lblSkill1.Text = $"Skill 1 ({GetDisplayTextForKey(settings.Skill1Action)}) Delay (ms):";
+            lblSkill2.Text = $"Skill 2 ({GetDisplayTextForKey(settings.Skill2Action)}) Delay (ms):";
+            lblSkill3.Text = $"Skill 3 ({GetDisplayTextForKey(settings.Skill3Action)}) Delay (ms):";
+            lblSkill4.Text = $"Skill 4 ({GetDisplayTextForKey(settings.Skill4Action)}) Delay (ms):";
+            lblPrimaryAttack.Text = $"Primary Attack ({GetDisplayTextForKey(settings.PrimaryAttackAction)}) Delay (ms):";
+            lblSecondaryAttack.Text = $"Secondary Attack ({GetDisplayTextForKey(settings.SecondaryAttackAction)}) Delay (ms):";
+            lblPotion.Text = $"Potion ({GetDisplayTextForKey(settings.PotionAction)}) Delay (ms):";
+            lblDodge.Text = $"Dodge ({GetDisplayTextForKey(settings.DodgeAction)}) Delay (ms):";
+
+            lblInstructions.Text = $"Press {GetDisplayTextForKey(settings.ToggleAutomationAction)} to start/stop automation.\r\nSet delay to 0 to disable an action.";
+        }
+
+        private string GetDisplayTextForKey(string keyString)
+        {
+            if (string.IsNullOrEmpty(keyString))
+            {
+                return string.Empty;
+            }
+
+            switch (keyString)
+            {
+                case "LeftClick":
+                    return "Left Click";
+                case "RightClick":
+                    return "Right Click";
+                case "MiddleClick":
+                    return "Middle Click";
+            }
+
+            if (keyString.StartsWith("D") && keyString.Length == 2 && char.IsDigit(keyString[1]))
+            {
+                return keyString.Substring(1); // Remove the 'D' prefix for number keys
+            }
+
+            if (keyString.StartsWith("NumPad") && keyString.Length > 6)
+            {
+                return $"NumPad {keyString.Substring(6)}";
+            }
+
+            return keyString;
         }
 
         protected override void WndProc(ref Message m)
@@ -186,14 +242,14 @@ namespace D4Automator
         {
             var tasks = new List<Task>
             {
-                RunActionLoop(settings.Skill1Delay, () => SimulateKeyPress("1"), cancellationToken),
-                RunActionLoop(settings.Skill2Delay, () => SimulateKeyPress("2"), cancellationToken),
-                RunActionLoop(settings.Skill3Delay, () => SimulateKeyPress("3"), cancellationToken),
-                RunActionLoop(settings.Skill4Delay, () => SimulateKeyPress("4"), cancellationToken),
-                RunActionLoop(settings.RightClickDelay, SimulateRightClick, cancellationToken),
-                RunActionLoop(settings.LeftClickDelay, SimulateLeftClick, cancellationToken),
-                RunActionLoop(settings.PotionDelay, () => SimulateKeyPress("q"), cancellationToken),
-                RunActionLoop(settings.DodgeDelay, () => SimulateKeyPress(" "), cancellationToken)
+                RunActionLoop(settings.Skill1Delay, keyMappings["Skill1"], cancellationToken),
+                RunActionLoop(settings.Skill2Delay, keyMappings["Skill2"], cancellationToken),
+                RunActionLoop(settings.Skill3Delay, keyMappings["Skill3"], cancellationToken),
+                RunActionLoop(settings.Skill4Delay, keyMappings["Skill4"], cancellationToken),
+                RunActionLoop(settings.PrimaryAttackDelay, keyMappings["PrimaryAttack"], cancellationToken),
+                RunActionLoop(settings.SecondaryAttackDelay, keyMappings["SecondaryAttack"], cancellationToken),
+                RunActionLoop(settings.PotionDelay, keyMappings["Potion"], cancellationToken),
+                RunActionLoop(settings.DodgeDelay, keyMappings["Dodge"], cancellationToken)
             };
 
             while (!cancellationToken.IsCancellationRequested)
@@ -224,7 +280,8 @@ namespace D4Automator
                 }
             }
         }
-        private void SimulateKeyPress(string key)
+
+        private void SimulateKeyPress(Keys key)
         {
             if (InvokeRequired)
             {
@@ -232,54 +289,54 @@ namespace D4Automator
                 return;
             }
 
-            byte vk = 0;
-            if (key.Length == 1)
-            {
-                if (char.IsLetterOrDigit(key[0]))
-                {
-                    vk = (byte)key.ToUpper()[0];
-                }
-                else if (key == " ")
-                {
-                    vk = 0x20; // Space
-                }
-            }
-
-            if (vk != 0)
-            {
-                keybd_event(vk, 0, 0, UIntPtr.Zero);
-                keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-            }
+            byte vk = (byte)key;
+            keybd_event(vk, 0, 0, UIntPtr.Zero);
+            keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
         }
 
-        private void SimulateRightClick()
+        private void SimulateMouseClick(MouseButtons button)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(SimulateRightClick));
+                Invoke(new Action(() => SimulateMouseClick(button)));
                 return;
             }
 
-            mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-            mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-        }
+            int downFlag;
+            int upFlag;
 
-        private void SimulateLeftClick()
-        {
-            if (InvokeRequired)
+            switch (button)
             {
-                Invoke(new Action(SimulateLeftClick));
-                return;
+                case MouseButtons.Left:
+                    downFlag = MOUSEEVENTF_LEFTDOWN;
+                    upFlag = MOUSEEVENTF_LEFTUP;
+                    break;
+                case MouseButtons.Right:
+                    downFlag = MOUSEEVENTF_RIGHTDOWN;
+                    upFlag = MOUSEEVENTF_RIGHTUP;
+                    break;
+                case MouseButtons.Middle:
+                    downFlag = MOUSEEVENTF_MIDDLEDOWN;
+                    upFlag = MOUSEEVENTF_MIDDLEUP;
+                    break;
+                default:
+                    // Unsupported mouse button
+                    return;
             }
 
-            mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-            mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+            mouse_event(downFlag, 0, 0, 0, 0);
+            mouse_event(upFlag, 0, 0, 0, 0);
         }
 
         private void RegisterGlobalHotkey()
         {
-            RegisterHotKey(this.Handle, HOTKEY_ID, 0, VK_F5);
+            UnregisterHotKey(this.Handle, HOTKEY_ID);
+            if (Enum.TryParse(settings.ToggleAutomationAction, out Keys key))
+            {
+                RegisterHotKey(this.Handle, HOTKEY_ID, 0, (uint)key);
+            }
         }
+
 
         private void UnregisterGlobalHotkey()
         {
@@ -293,7 +350,7 @@ namespace D4Automator
 
             foreach (Control control in this.Controls)
             {
-                if (control is NumericUpDown)
+                if (control is NumericUpDown || control is Button)
                 {
                     control.BackColor = Color.FromArgb(45, 45, 45);
                     control.ForeColor = Color.White;
@@ -327,13 +384,13 @@ namespace D4Automator
 
         private void nudRightClick_ValueChanged(object sender, EventArgs e)
         {
-            settings.RightClickDelay = (int)nudRightClick.Value;
+            settings.PrimaryAttackDelay = (int)nudPrimaryAttack.Value;
             SaveSettings();
         }
 
         private void nudLeftClick_ValueChanged(object sender, EventArgs e)
         {
-            settings.LeftClickDelay = (int)nudLeftClick.Value;
+            settings.SecondaryAttackDelay = (int)nudSecondaryAttack.Value;
             SaveSettings();
         }
 
@@ -354,6 +411,61 @@ namespace D4Automator
             SaveSettings();
             UnregisterGlobalHotkey();
         }
+
+        private void btnKeyConfig_Click(object sender, EventArgs e)
+        {
+            using (var keyConfigForm = new KeyConfigForm(settings))
+            {
+                if (keyConfigForm.ShowDialog() == DialogResult.OK)
+                {
+                    SaveSettings();
+                    UpdateKeyMappings();
+                    UpdateLabels();
+                }
+            }
+        }
+
+        private void UpdateKeyMappings()
+        {
+            keyMappings = new Dictionary<string, Action>
+            {
+                {"Skill1", () => SimulateAction(settings.Skill1Action)},
+                {"Skill2", () => SimulateAction(settings.Skill2Action)},
+                {"Skill3", () => SimulateAction(settings.Skill3Action)},
+                {"Skill4", () => SimulateAction(settings.Skill4Action)},
+                {"PrimaryAttack", () => SimulateAction(settings.PrimaryAttackAction)},
+                {"SecondaryAttack", () => SimulateAction(settings.SecondaryAttackAction)},
+                {"Potion", () => SimulateAction(settings.PotionAction)},
+                {"Dodge", () => SimulateAction(settings.DodgeAction)}
+            };
+
+            RegisterGlobalHotkey();
+        }
+
+        // Add this field to the MainForm class
+        private Dictionary<string, Action> keyMappings;
+
+        private void SimulateAction(string action)
+        {
+            switch (action)
+            {
+                case "LeftClick":
+                    SimulateMouseClick(MouseButtons.Left);
+                    break;
+                case "RightClick":
+                    SimulateMouseClick(MouseButtons.Right);
+                    break;
+                case "MiddleClick":
+                    SimulateMouseClick(MouseButtons.Middle);
+                    break;
+                default:
+                    if (Enum.TryParse(action, out Keys key))
+                    {
+                        SimulateKeyPress(key);
+                    }
+                    break;
+            }
+        }
     }
 
     public class Settings
@@ -362,9 +474,43 @@ namespace D4Automator
         public int Skill2Delay { get; set; }
         public int Skill3Delay { get; set; }
         public int Skill4Delay { get; set; }
-        public int RightClickDelay { get; set; }
-        public int LeftClickDelay { get; set; }
+        public int PrimaryAttackDelay { get; set; }
+        public int SecondaryAttackDelay { get; set; }
         public int PotionDelay { get; set; }
         public int DodgeDelay { get; set; }
+
+        public string Skill1Action { get; set; }
+        public string Skill2Action { get; set; }
+        public string Skill3Action { get; set; }
+        public string Skill4Action { get; set; }
+        public string PrimaryAttackAction { get; set; }
+        public string SecondaryAttackAction { get; set; }
+        public string PotionAction { get; set; }
+        public string DodgeAction { get; set; }
+        public string ToggleAutomationAction { get; set; }
+
+        public Settings()
+        {
+            // Set default values
+            Skill1Action = "D1";
+            Skill2Action = "D2";
+            Skill3Action = "D3";
+            Skill4Action = "D4";
+            PrimaryAttackAction = "RightClick";
+            SecondaryAttackAction = "LeftClick";
+            PotionAction = "Q";
+            DodgeAction = "Space";
+            ToggleAutomationAction = "F5";
+
+            // Set default delays
+            Skill1Delay = 1000;
+            Skill2Delay = 1000;
+            Skill3Delay = 1000;
+            Skill4Delay = 1000;
+            PrimaryAttackDelay = 100;
+            SecondaryAttackDelay = 100;
+            PotionDelay = 5000;
+            DodgeDelay = 1000;
+        }
     }
 }
