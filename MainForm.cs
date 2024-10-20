@@ -9,6 +9,8 @@ using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using SharpDX.XInput;
+
 namespace D4Automator
 {
     public partial class MainForm : Form
@@ -44,6 +46,11 @@ namespace D4Automator
         private string settingsPath;
         private CancellationTokenSource cancellationTokenSource;
 
+        private Controller controller;
+        private System.Windows.Forms.Timer controllerCheckTimer;
+        private const float DEAD_ZONE = 0.1f; // Adjust as needed
+        private bool wasAutomationRunning = false;
+
         public MainForm()
         {
             InitializeComponent();
@@ -54,6 +61,63 @@ namespace D4Automator
             AttachEventHandlers();
             SetFormTitle();
             UpdateLabels();
+            InitializeControllerDetection();
+        }
+
+        private void InitializeControllerDetection()
+        {
+            // Assumes the first controller
+            controller = new Controller(UserIndex.One); 
+
+            // Check if controller is connected
+            if (controller.IsConnected)
+            {
+                controllerCheckTimer = new System.Windows.Forms.Timer();
+                controllerCheckTimer.Interval = 50; // Check every 50ms
+                controllerCheckTimer.Tick += ControllerCheckTimer_Tick;
+                controllerCheckTimer.Start();
+            }
+        }
+
+        private void ControllerCheckTimer_Tick(object sender, EventArgs e)
+        {
+            if (controller.IsConnected)
+            {
+                var state = controller.GetState();
+
+                bool controllerMoved = IsControllerMoved(state);
+
+                if (controllerMoved)
+                {
+                    if (isRunning)
+                    {
+                        StopAutomation();
+                        wasAutomationRunning = true;
+                    }
+                }
+                else if (wasAutomationRunning)
+                {
+                    StartAutomation();
+                    wasAutomationRunning = false;
+                }
+            }
+        }
+
+        private bool IsControllerMoved(State state)
+        {
+            // Check analog sticks
+            bool leftStickMoved = Math.Abs(state.Gamepad.LeftThumbX) > short.MaxValue * DEAD_ZONE ||
+                                  Math.Abs(state.Gamepad.LeftThumbY) > short.MaxValue * DEAD_ZONE;
+            bool rightStickMoved = Math.Abs(state.Gamepad.RightThumbX) > short.MaxValue * DEAD_ZONE ||
+                                   Math.Abs(state.Gamepad.RightThumbY) > short.MaxValue * DEAD_ZONE;
+
+            // Check digital pad
+            bool dPadPressed = state.Gamepad.Buttons.HasFlag(GamepadButtonFlags.DPadUp) ||
+                               state.Gamepad.Buttons.HasFlag(GamepadButtonFlags.DPadDown) ||
+                               state.Gamepad.Buttons.HasFlag(GamepadButtonFlags.DPadLeft) ||
+                               state.Gamepad.Buttons.HasFlag(GamepadButtonFlags.DPadRight);
+
+            return leftStickMoved || rightStickMoved || dPadPressed;
         }
 
         private void InitializeKeyMappings()
@@ -204,12 +268,15 @@ namespace D4Automator
             if (!isRunning)
             {
                 StartAutomation();
+                wasAutomationRunning = false; // Reset this flag when manually starting
             }
             else
             {
                 StopAutomation();
+                wasAutomationRunning = false; // Ensure this is false when manually stopping
             }
         }
+
 
         private async void StartAutomation()
         {
@@ -410,6 +477,10 @@ namespace D4Automator
         {
             SaveSettings();
             UnregisterGlobalHotkey();
+
+            controllerCheckTimer?.Stop();
+            controllerCheckTimer?.Dispose();
+            controller = null;
         }
 
         private void btnKeyConfig_Click(object sender, EventArgs e)
