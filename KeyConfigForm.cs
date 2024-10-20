@@ -88,6 +88,7 @@ namespace D4Automator
                 if (IsUnique(displayValue, textBox))
                 {
                     textBox.Text = displayValue;
+                    textBox.Tag = e.KeyCode; // Set the Tag for keyboard inputs
                     isListening = false;
                     isFirstClick = true;
                     e.Handled = true;
@@ -146,6 +147,7 @@ namespace D4Automator
                 if (!string.IsNullOrEmpty(clickAction) && IsUnique(clickAction, textBox))
                 {
                     textBox.Text = clickAction;
+                    textBox.Tag = null; // Clear the Tag for mouse clicks
                     isListening = false;
                     isFirstClick = true;
                 }
@@ -241,8 +243,17 @@ namespace D4Automator
                 var property = settings.GetType().GetProperty(kvp.Key);
                 if (property != null)
                 {
-                    // Use the Tag if it's set (for mouse clicks), otherwise use the Text
-                    string value = kvp.Value.Tag != null ? kvp.Value.Tag.ToString() : kvp.Value.Text;
+                    string value;
+                    if (kvp.Value.Tag != null)
+                    {
+                        // For keyboard inputs, use the Keys enum value
+                        value = ((Keys)kvp.Value.Tag).ToString();
+                    }
+                    else
+                    {
+                        // For mouse clicks, use the text directly
+                        value = kvp.Value.Text;
+                    }
                     property.SetValue(settings, value);
                 }
             }
