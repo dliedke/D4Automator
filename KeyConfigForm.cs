@@ -166,12 +166,6 @@ namespace D4Automator
             return IsUnique(keyString, currentTextBox);
         }
 
-        private bool IsValidKey(MouseButtons button, TextBox currentTextBox)
-        {
-            string buttonString = GetMouseClickAction(button);
-            return IsUnique(buttonString, currentTextBox);
-        }
-
         private bool IsUnique(string actionString, TextBox currentTextBox)
         {
             // Get all current values from other textboxes
@@ -201,6 +195,10 @@ namespace D4Automator
                     return "RightClick";
                 case MouseButtons.Middle:
                     return "MiddleClick";
+                case MouseButtons.XButton1:
+                    return "MouseBack";  // Usually "Back" button
+                case MouseButtons.XButton2:
+                    return "MouseForward";  // Usually "Forward" button
                 default:
                     return string.Empty;
             }

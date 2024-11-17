@@ -136,7 +136,7 @@
             // 
             // nudSkill1
             // 
-            this.nudSkill1.Location = new System.Drawing.Point(346, 21);
+            this.nudSkill1.Location = new System.Drawing.Point(390, 17);
             this.nudSkill1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill1.Maximum = new decimal(new int[] {
             30000,
@@ -149,7 +149,7 @@
             // 
             // nudSkill2
             // 
-            this.nudSkill2.Location = new System.Drawing.Point(346, 61);
+            this.nudSkill2.Location = new System.Drawing.Point(390, 57);
             this.nudSkill2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill2.Maximum = new decimal(new int[] {
             30000,
@@ -162,7 +162,7 @@
             // 
             // nudSkill3
             // 
-            this.nudSkill3.Location = new System.Drawing.Point(346, 101);
+            this.nudSkill3.Location = new System.Drawing.Point(390, 97);
             this.nudSkill3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill3.Maximum = new decimal(new int[] {
             30000,
@@ -175,7 +175,7 @@
             // 
             // nudSkill4
             // 
-            this.nudSkill4.Location = new System.Drawing.Point(346, 141);
+            this.nudSkill4.Location = new System.Drawing.Point(390, 137);
             this.nudSkill4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill4.Maximum = new decimal(new int[] {
             30000,
@@ -188,7 +188,7 @@
             // 
             // nudPrimaryAttack
             // 
-            this.nudPrimaryAttack.Location = new System.Drawing.Point(346, 181);
+            this.nudPrimaryAttack.Location = new System.Drawing.Point(390, 177);
             this.nudPrimaryAttack.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudPrimaryAttack.Maximum = new decimal(new int[] {
             30000,
@@ -201,7 +201,7 @@
             // 
             // nudSecondaryAttack
             // 
-            this.nudSecondaryAttack.Location = new System.Drawing.Point(346, 221);
+            this.nudSecondaryAttack.Location = new System.Drawing.Point(390, 217);
             this.nudSecondaryAttack.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSecondaryAttack.Maximum = new decimal(new int[] {
             30000,
@@ -214,7 +214,7 @@
             // 
             // nudPotion
             // 
-            this.nudPotion.Location = new System.Drawing.Point(346, 261);
+            this.nudPotion.Location = new System.Drawing.Point(390, 257);
             this.nudPotion.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudPotion.Maximum = new decimal(new int[] {
             30000,
@@ -227,7 +227,7 @@
             // 
             // nudDodge
             // 
-            this.nudDodge.Location = new System.Drawing.Point(346, 301);
+            this.nudDodge.Location = new System.Drawing.Point(390, 297);
             this.nudDodge.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudDodge.Maximum = new decimal(new int[] {
             30000,
@@ -242,7 +242,7 @@
             // 
             this.lblInstructions.AutoSize = true;
             this.lblInstructions.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblInstructions.Location = new System.Drawing.Point(96, 357);
+            this.lblInstructions.Location = new System.Drawing.Point(122, 354);
             this.lblInstructions.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblInstructions.Name = "lblInstructions";
             this.lblInstructions.Size = new System.Drawing.Size(251, 40);
@@ -252,7 +252,7 @@
             // btnKeyConfig
             // 
             this.btnKeyConfig.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnKeyConfig.Location = new System.Drawing.Point(151, 414);
+            this.btnKeyConfig.Location = new System.Drawing.Point(177, 411);
             this.btnKeyConfig.Name = "btnKeyConfig";
             this.btnKeyConfig.Size = new System.Drawing.Size(134, 29);
             this.btnKeyConfig.TabIndex = 17;
@@ -264,7 +264,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(482, 460);
+            this.ClientSize = new System.Drawing.Size(532, 460);
             this.Controls.Add(this.btnKeyConfig);
             this.Controls.Add(this.lblInstructions);
             this.Controls.Add(this.nudDodge);

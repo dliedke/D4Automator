@@ -37,11 +37,13 @@ namespace D4Automator
         private const int MOUSEEVENTF_RIGHTUP = 0x0010;
         private const int MOUSEEVENTF_MIDDLEDOWN = 0x0020;
         private const int MOUSEEVENTF_MIDDLEUP = 0x0040;
+        private const int MOUSEEVENTF_XDOWN = 0x0080;
+        private const int MOUSEEVENTF_XUP = 0x0100;
+        private const int XBUTTON1 = 0x0001;
+        private const int XBUTTON2 = 0x0002;
         private const int HOTKEY_ID = 9000;
-        private const uint VK_F5 = 0x74;
 
         private bool isRunning = false;
-        private Random random = new Random();
         private Settings settings;
         private string settingsPath;
         private CancellationTokenSource cancellationTokenSource;
@@ -67,7 +69,7 @@ namespace D4Automator
         private void InitializeControllerDetection()
         {
             // Assumes the first controller
-            controller = new Controller(UserIndex.One); 
+            controller = new Controller(UserIndex.One);
 
             // Check if controller is connected
             if (controller.IsConnected)
@@ -239,6 +241,12 @@ namespace D4Automator
                     return "Right Click";
                 case "MiddleClick":
                     return "Middle Click";
+                case "MouseBack":
+                    return "Mouse Back";
+                case "MouseForward":
+                    return "Mouse Forward";
+                default:
+                    return keyString;
             }
 
             if (keyString.StartsWith("D") && keyString.Length == 2 && char.IsDigit(keyString[1]))
@@ -360,7 +368,7 @@ namespace D4Automator
             keybd_event(vk, 0, 0, UIntPtr.Zero);
             keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
         }
-
+        
         private void SimulateMouseClick(MouseButtons button)
         {
             if (InvokeRequired)
@@ -371,6 +379,7 @@ namespace D4Automator
 
             int downFlag;
             int upFlag;
+            int mouseData = 0;  // Required for X buttons
 
             switch (button)
             {
@@ -386,13 +395,23 @@ namespace D4Automator
                     downFlag = MOUSEEVENTF_MIDDLEDOWN;
                     upFlag = MOUSEEVENTF_MIDDLEUP;
                     break;
+                case MouseButtons.XButton1:
+                    downFlag = MOUSEEVENTF_XDOWN;
+                    upFlag = MOUSEEVENTF_XUP;
+                    mouseData = XBUTTON1;
+                    break;
+                case MouseButtons.XButton2:
+                    downFlag = MOUSEEVENTF_XDOWN;
+                    upFlag = MOUSEEVENTF_XUP;
+                    mouseData = XBUTTON2;
+                    break;
                 default:
                     // Unsupported mouse button
                     return;
             }
 
-            mouse_event(downFlag, 0, 0, 0, 0);
-            mouse_event(upFlag, 0, 0, 0, 0);
+            mouse_event(downFlag, 0, 0, mouseData, 0);
+            mouse_event(upFlag, 0, 0, mouseData, 0);
         }
 
         private void RegisterGlobalHotkey()
@@ -528,6 +547,12 @@ namespace D4Automator
                     break;
                 case "MiddleClick":
                     SimulateMouseClick(MouseButtons.Middle);
+                    break;
+                case "MouseBack":
+                    SimulateMouseClick(MouseButtons.XButton1);
+                    break;
+                case "MouseForward":
+                    SimulateMouseClick(MouseButtons.XButton2);
                     break;
                 default:
                     if (Enum.TryParse(action, out Keys key))
