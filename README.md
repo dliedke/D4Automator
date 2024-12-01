@@ -1,9 +1,7 @@
-Automate Diablo IV actions in PC, including skills 1-4, left and right mouse button click, potions and dodge.
+Automate Diablo IV actions in PC, including skills 1-4, Primary and Secondary attach, potions and dodge.
+
+Good to use for: Pit, Tourmented Bosses, Infernal Hordes
 
 Enable/Disable the automation using F5.
 
-Requires .NET 8.0 to run, download from:
-
-https://dotnet.microsoft.com/en-us/download/dotnet/8.0
-
-(SDK 8 - Windows x64 version)
+Features configurable keys/mouse actions according to your Diablo IV control customization.
