@@ -53,6 +53,20 @@ namespace D4Automator
         private const float DEAD_ZONE = 0.1f; // Adjust as needed
         private bool wasAutomationRunning = false;
 
+        private bool isMouseMoveEnabled = false;
+        private bool isMoving = false;
+        private System.Windows.Forms.Timer moveTimer;
+        private const int PAUSE_DURATION = 5000; // 5 second pause at each corner
+        private const int RECT_WIDTH = 700; // Width of rectangle
+        private const int RECT_HEIGHT = 400; // Height of rectangle
+        private const int MOVE_STEPS = 30; // Steps for smooth movement
+        private Point initialPosition;
+        private Point targetPosition;
+        private Point startPosition;
+        private int currentStep = 0;
+        private bool isMovingToTarget = false;
+        private int currentCorner = 0; // 0: top-right, 1: bottom-right, 2: bottom-left, 3: top-left
+
         public MainForm()
         {
             InitializeComponent();
@@ -264,11 +278,134 @@ namespace D4Automator
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == 0x0312 && m.WParam.ToInt32() == HOTKEY_ID)
+            if (m.Msg == 0x0312) // WM_HOTKEY
             {
-                ToggleAutomation();
+                // Original automation hotkey
+                if (m.WParam.ToInt32() == HOTKEY_ID) 
+                {
+                    ToggleAutomation();
+
+                    if (isMouseMoveEnabled)
+                    {
+                        ToggleMovement();
+                    }
+                }
             }
+
             base.WndProc(ref m);
+        }
+
+
+        private void chkMouseMove_CheckedChanged(object sender, EventArgs e)
+        {
+            isMouseMoveEnabled = chkMouseMove.Checked;
+
+            if (chkMouseMove.Checked)
+            {
+                InitializeMouseMovement();
+            }
+            else
+            {
+                moveTimer.Stop();
+            }
+        }
+
+        private void InitializeMouseMovement()
+        {
+            moveTimer = new System.Windows.Forms.Timer();
+            moveTimer.Interval = 50;
+            moveTimer.Tick += MoveTimer_Tick;
+        }
+
+        private void ToggleMovement()
+        {
+            isMoving = !isMoving;
+            if (isMoving)
+            {
+                initialPosition = System.Windows.Forms.Cursor.Position;
+                currentCorner = 0;
+                StartNextMove();
+                moveTimer.Start();
+            }
+            else
+            {
+                moveTimer.Stop();
+            }
+        }
+
+        private Point GetCornerPosition(int corner)
+        {
+            switch (corner)
+            {
+                case 0: // Top-right
+                    return new Point(initialPosition.X + RECT_WIDTH / 2, initialPosition.Y - RECT_HEIGHT / 2);
+                case 1: // Bottom-right
+                    return new Point(initialPosition.X + RECT_WIDTH / 2, initialPosition.Y + RECT_HEIGHT / 2);
+                case 2: // Bottom-left
+                    return new Point(initialPosition.X - RECT_WIDTH / 2, initialPosition.Y + RECT_HEIGHT / 2);
+                case 3: // Top-left
+                    return new Point(initialPosition.X - RECT_WIDTH / 2, initialPosition.Y - RECT_HEIGHT / 2);
+                default:
+                    return initialPosition;
+            }
+        }
+
+        private void StartNextMove()
+        {
+            startPosition = System.Windows.Forms.Cursor.Position;
+            targetPosition = GetCornerPosition(currentCorner);
+            currentStep = 0;
+            isMovingToTarget = true;
+        }
+
+        private async Task PauseBetweenMoves()
+        {
+            isMovingToTarget = false;
+            await Task.Delay(PAUSE_DURATION);
+            if (isMoving)
+            {
+                // Move to next corner
+                currentCorner = (currentCorner + 1) % 4;
+                StartNextMove();
+            }
+        }
+
+        private void MoveTimer_Tick(object sender, EventArgs e)
+        {
+            if (!isMoving) return;
+
+            if (!isMovingToTarget)
+            {
+                return; // We're in a pause
+            }
+
+            // Calculate progress (0.0 to 1.0)
+            float progress = (float)currentStep / MOVE_STEPS;
+
+            // Use easing function to make movement more natural
+            progress = EaseInOutQuad(progress);
+
+            // Calculate new position
+            int newX = (int)(startPosition.X + (targetPosition.X - startPosition.X) * progress);
+            int newY = (int)(startPosition.Y + (targetPosition.Y - startPosition.Y) * progress);
+
+            // Move cursor
+            System.Windows.Forms.Cursor.Position = new Point(newX, newY);
+
+            // Increment step
+            currentStep++;
+
+            // If we've reached the target, start a pause
+            if (currentStep >= MOVE_STEPS)
+            {
+                _ = PauseBetweenMoves();
+            }
+        }
+
+        // Easing function to make movement more natural
+        private float EaseInOutQuad(float t)
+        {
+            return t < 0.5f ? 2 * t * t : 1 - (float)Math.Pow(-2 * t + 2, 2) / 2;
         }
 
         private void ToggleAutomation()
@@ -368,7 +505,7 @@ namespace D4Automator
             keybd_event(vk, 0, 0, UIntPtr.Zero);
             keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
         }
-        
+
         private void SimulateMouseClick(MouseButtons button)
         {
             if (InvokeRequired)
@@ -496,9 +633,11 @@ namespace D4Automator
         {
             SaveSettings();
             UnregisterGlobalHotkey();
+            UnregisterHotKey(this.Handle, 9001); // Unregister F4 hotkey
 
             controllerCheckTimer?.Stop();
             controllerCheckTimer?.Dispose();
+            moveTimer?.Dispose();
             controller = null;
         }
 
@@ -562,6 +701,8 @@ namespace D4Automator
                     break;
             }
         }
+
+       
     }
 
     public class Settings

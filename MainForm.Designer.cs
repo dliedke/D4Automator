@@ -36,6 +36,7 @@
             this.nudDodge = new System.Windows.Forms.NumericUpDown();
             this.lblInstructions = new System.Windows.Forms.Label();
             this.btnKeyConfig = new System.Windows.Forms.Button();
+            this.chkMouseMove = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill3)).BeginInit();
@@ -242,7 +243,7 @@
             // 
             this.lblInstructions.AutoSize = true;
             this.lblInstructions.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblInstructions.Location = new System.Drawing.Point(122, 354);
+            this.lblInstructions.Location = new System.Drawing.Point(126, 343);
             this.lblInstructions.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblInstructions.Name = "lblInstructions";
             this.lblInstructions.Size = new System.Drawing.Size(251, 40);
@@ -252,7 +253,7 @@
             // btnKeyConfig
             // 
             this.btnKeyConfig.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnKeyConfig.Location = new System.Drawing.Point(177, 411);
+            this.btnKeyConfig.Location = new System.Drawing.Point(173, 423);
             this.btnKeyConfig.Name = "btnKeyConfig";
             this.btnKeyConfig.Size = new System.Drawing.Size(134, 29);
             this.btnKeyConfig.TabIndex = 17;
@@ -260,11 +261,23 @@
             this.btnKeyConfig.UseVisualStyleBackColor = true;
             this.btnKeyConfig.Click += new System.EventHandler(this.btnKeyConfig_Click);
             // 
+            // chkMouseMove
+            // 
+            this.chkMouseMove.AutoSize = true;
+            this.chkMouseMove.Location = new System.Drawing.Point(130, 393);
+            this.chkMouseMove.Name = "chkMouseMove";
+            this.chkMouseMove.Size = new System.Drawing.Size(255, 24);
+            this.chkMouseMove.TabIndex = 19;
+            this.chkMouseMove.Text = "Mouse move for Infernal Hordes";
+            this.chkMouseMove.UseVisualStyleBackColor = true;
+            this.chkMouseMove.CheckedChanged += new System.EventHandler(this.chkMouseMove_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(532, 460);
+            this.Controls.Add(this.chkMouseMove);
             this.Controls.Add(this.btnKeyConfig);
             this.Controls.Add(this.lblInstructions);
             this.Controls.Add(this.nudDodge);
@@ -324,5 +337,6 @@
         private System.Windows.Forms.NumericUpDown nudDodge;
         private System.Windows.Forms.Label lblInstructions;
         private System.Windows.Forms.Button btnKeyConfig;
+        private System.Windows.Forms.CheckBox chkMouseMove;
     }
 }
