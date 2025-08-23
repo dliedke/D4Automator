@@ -56,16 +56,14 @@ namespace D4Automator
         private bool isMouseMoveEnabled = false;
         private bool isMoving = false;
         private System.Windows.Forms.Timer moveTimer;
-        private const int PAUSE_DURATION = 5000; // 5 second pause at each corner
-        private const int RECT_WIDTH = 700; // Width of rectangle
-        private const int RECT_HEIGHT = 400; // Height of rectangle
-        private const int MOVE_STEPS = 30; // Steps for smooth movement
-        private Point initialPosition;
+        private const int PAUSE_DURATION = 4000; // Pause between moves
+        private const int BORDER_PADDING = 50; // Distance from screen borders
+        private const int MOVE_STEPS = 50; // Steps for smooth movement
         private Point targetPosition;
         private Point startPosition;
         private int currentStep = 0;
         private bool isMovingToTarget = false;
-        private int currentCorner = 0; // 0: top-right, 1: bottom-right, 2: bottom-left, 3: top-left
+        private int currentDirection = 0; // 0=up, 1=down, 2=up-left, 3=down-right
 
         public MainForm()
         {
@@ -322,8 +320,7 @@ namespace D4Automator
             isMoving = !isMoving;
             if (isMoving)
             {
-                initialPosition = System.Windows.Forms.Cursor.Position;
-                currentCorner = 0;
+                currentDirection = 0; // Start with up
                 StartNextMove();
                 moveTimer.Start();
             }
@@ -333,27 +330,52 @@ namespace D4Automator
             }
         }
 
-        private Point GetCornerPosition(int corner)
+        private Point GetDirectionalPosition()
         {
-            switch (corner)
+            Rectangle screenBounds = Screen.PrimaryScreen.Bounds;
+            Point newPos;
+            
+            switch (currentDirection)
             {
-                case 0: // Top-right
-                    return new Point(initialPosition.X + RECT_WIDTH / 2, initialPosition.Y - RECT_HEIGHT / 2);
-                case 1: // Bottom-right
-                    return new Point(initialPosition.X + RECT_WIDTH / 2, initialPosition.Y + RECT_HEIGHT / 2);
-                case 2: // Bottom-left
-                    return new Point(initialPosition.X - RECT_WIDTH / 2, initialPosition.Y + RECT_HEIGHT / 2);
-                case 3: // Top-left
-                    return new Point(initialPosition.X - RECT_WIDTH / 2, initialPosition.Y - RECT_HEIGHT / 2);
+                case 0: // Up - center width, top with padding
+                    newPos = new Point(
+                        screenBounds.Width / 2,
+                        screenBounds.Top + BORDER_PADDING
+                    );
+                    break;
+                case 1: // Down - center width, bottom with padding
+                    newPos = new Point(
+                        screenBounds.Width / 2,
+                        screenBounds.Bottom - BORDER_PADDING
+                    );
+                    break;
+                case 2: // Up-Left corner with padding
+                    newPos = new Point(
+                        screenBounds.Left + BORDER_PADDING,
+                        screenBounds.Top + BORDER_PADDING
+                    );
+                    break;
+                case 3: // Down-Right corner with padding
+                    newPos = new Point(
+                        screenBounds.Right - BORDER_PADDING,
+                        screenBounds.Bottom - BORDER_PADDING
+                    );
+                    break;
                 default:
-                    return initialPosition;
+                    newPos = System.Windows.Forms.Cursor.Position;
+                    break;
             }
+            
+            // Move to next direction for next cycle
+            currentDirection = (currentDirection + 1) % 4;
+            
+            return newPos;
         }
 
         private void StartNextMove()
         {
             startPosition = System.Windows.Forms.Cursor.Position;
-            targetPosition = GetCornerPosition(currentCorner);
+            targetPosition = GetDirectionalPosition();
             currentStep = 0;
             isMovingToTarget = true;
         }
@@ -364,8 +386,6 @@ namespace D4Automator
             await Task.Delay(PAUSE_DURATION);
             if (isMoving)
             {
-                // Move to next corner
-                currentCorner = (currentCorner + 1) % 4;
                 StartNextMove();
             }
         }
@@ -382,7 +402,7 @@ namespace D4Automator
             // Calculate progress (0.0 to 1.0)
             float progress = (float)currentStep / MOVE_STEPS;
 
-            // Use easing function to make movement more natural
+            // Use smooth easing for directional movement
             progress = EaseInOutQuad(progress);
 
             // Calculate new position
