@@ -5,3 +5,5 @@ Good to use for: Pit, Tourmented Bosses, Infernal Hordes
 Enable/Disable the automation using F5.
 
 Features configurable keys/mouse actions according to your Diablo IV control customization.
+
+Automatic mouse move support for infernal hordes.
