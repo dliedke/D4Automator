@@ -18,6 +18,14 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadConfigurationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveConfigurationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.resetToDefaultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblSkill1 = new System.Windows.Forms.Label();
             this.lblSkill2 = new System.Windows.Forms.Label();
             this.lblSkill3 = new System.Windows.Forms.Label();
@@ -37,6 +45,7 @@
             this.lblInstructions = new System.Windows.Forms.Label();
             this.btnKeyConfig = new System.Windows.Forms.Button();
             this.chkMouseMove = new System.Windows.Forms.CheckBox();
+            this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill3)).BeginInit();
@@ -47,11 +56,72 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudDodge)).BeginInit();
             this.SuspendLayout();
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(532, 24);
+            this.menuStrip1.TabIndex = 20;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadConfigurationToolStripMenuItem,
+            this.saveConfigurationToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.resetToDefaultsToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.exitToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "&File";
+            // 
+            // loadConfigurationToolStripMenuItem
+            // 
+            this.loadConfigurationToolStripMenuItem.Name = "loadConfigurationToolStripMenuItem";
+            this.loadConfigurationToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.loadConfigurationToolStripMenuItem.Text = "&Load Configuration...";
+            this.loadConfigurationToolStripMenuItem.Click += new System.EventHandler(this.loadConfigurationToolStripMenuItem_Click);
+            // 
+            // saveConfigurationToolStripMenuItem
+            // 
+            this.saveConfigurationToolStripMenuItem.Name = "saveConfigurationToolStripMenuItem";
+            this.saveConfigurationToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.saveConfigurationToolStripMenuItem.Text = "&Save Configuration...";
+            this.saveConfigurationToolStripMenuItem.Click += new System.EventHandler(this.saveConfigurationToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(183, 6);
+            // 
+            // resetToDefaultsToolStripMenuItem
+            // 
+            this.resetToDefaultsToolStripMenuItem.Name = "resetToDefaultsToolStripMenuItem";
+            this.resetToDefaultsToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.resetToDefaultsToolStripMenuItem.Text = "&Reset to Defaults";
+            this.resetToDefaultsToolStripMenuItem.Click += new System.EventHandler(this.resetToDefaultsToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(183, 6);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.exitToolStripMenuItem.Text = "E&xit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
             // lblSkill1
             // 
             this.lblSkill1.AutoSize = true;
             this.lblSkill1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSkill1.Location = new System.Drawing.Point(18, 23);
+            this.lblSkill1.Location = new System.Drawing.Point(18, 47);
             this.lblSkill1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSkill1.Name = "lblSkill1";
             this.lblSkill1.Size = new System.Drawing.Size(156, 20);
@@ -62,7 +132,7 @@
             // 
             this.lblSkill2.AutoSize = true;
             this.lblSkill2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSkill2.Location = new System.Drawing.Point(18, 63);
+            this.lblSkill2.Location = new System.Drawing.Point(18, 87);
             this.lblSkill2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSkill2.Name = "lblSkill2";
             this.lblSkill2.Size = new System.Drawing.Size(156, 20);
@@ -73,7 +143,7 @@
             // 
             this.lblSkill3.AutoSize = true;
             this.lblSkill3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSkill3.Location = new System.Drawing.Point(18, 103);
+            this.lblSkill3.Location = new System.Drawing.Point(18, 127);
             this.lblSkill3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSkill3.Name = "lblSkill3";
             this.lblSkill3.Size = new System.Drawing.Size(156, 20);
@@ -84,7 +154,7 @@
             // 
             this.lblSkill4.AutoSize = true;
             this.lblSkill4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSkill4.Location = new System.Drawing.Point(18, 143);
+            this.lblSkill4.Location = new System.Drawing.Point(18, 167);
             this.lblSkill4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSkill4.Name = "lblSkill4";
             this.lblSkill4.Size = new System.Drawing.Size(156, 20);
@@ -95,7 +165,7 @@
             // 
             this.lblPrimaryAttack.AutoSize = true;
             this.lblPrimaryAttack.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPrimaryAttack.Location = new System.Drawing.Point(18, 183);
+            this.lblPrimaryAttack.Location = new System.Drawing.Point(18, 207);
             this.lblPrimaryAttack.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblPrimaryAttack.Name = "lblPrimaryAttack";
             this.lblPrimaryAttack.Size = new System.Drawing.Size(194, 20);
@@ -106,7 +176,7 @@
             // 
             this.lblSecondaryAttack.AutoSize = true;
             this.lblSecondaryAttack.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSecondaryAttack.Location = new System.Drawing.Point(18, 223);
+            this.lblSecondaryAttack.Location = new System.Drawing.Point(18, 247);
             this.lblSecondaryAttack.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSecondaryAttack.Name = "lblSecondaryAttack";
             this.lblSecondaryAttack.Size = new System.Drawing.Size(218, 20);
@@ -117,7 +187,7 @@
             // 
             this.lblPotion.AutoSize = true;
             this.lblPotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPotion.Location = new System.Drawing.Point(18, 263);
+            this.lblPotion.Location = new System.Drawing.Point(18, 287);
             this.lblPotion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblPotion.Name = "lblPotion";
             this.lblPotion.Size = new System.Drawing.Size(163, 20);
@@ -128,7 +198,7 @@
             // 
             this.lblDodge.AutoSize = true;
             this.lblDodge.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDodge.Location = new System.Drawing.Point(18, 303);
+            this.lblDodge.Location = new System.Drawing.Point(18, 327);
             this.lblDodge.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblDodge.Name = "lblDodge";
             this.lblDodge.Size = new System.Drawing.Size(200, 20);
@@ -137,7 +207,7 @@
             // 
             // nudSkill1
             // 
-            this.nudSkill1.Location = new System.Drawing.Point(390, 17);
+            this.nudSkill1.Location = new System.Drawing.Point(390, 41);
             this.nudSkill1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill1.Maximum = new decimal(new int[] {
             30000,
@@ -150,7 +220,7 @@
             // 
             // nudSkill2
             // 
-            this.nudSkill2.Location = new System.Drawing.Point(390, 57);
+            this.nudSkill2.Location = new System.Drawing.Point(390, 81);
             this.nudSkill2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill2.Maximum = new decimal(new int[] {
             30000,
@@ -163,7 +233,7 @@
             // 
             // nudSkill3
             // 
-            this.nudSkill3.Location = new System.Drawing.Point(390, 97);
+            this.nudSkill3.Location = new System.Drawing.Point(390, 121);
             this.nudSkill3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill3.Maximum = new decimal(new int[] {
             30000,
@@ -176,7 +246,7 @@
             // 
             // nudSkill4
             // 
-            this.nudSkill4.Location = new System.Drawing.Point(390, 137);
+            this.nudSkill4.Location = new System.Drawing.Point(390, 161);
             this.nudSkill4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSkill4.Maximum = new decimal(new int[] {
             30000,
@@ -189,7 +259,7 @@
             // 
             // nudPrimaryAttack
             // 
-            this.nudPrimaryAttack.Location = new System.Drawing.Point(390, 177);
+            this.nudPrimaryAttack.Location = new System.Drawing.Point(390, 201);
             this.nudPrimaryAttack.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudPrimaryAttack.Maximum = new decimal(new int[] {
             30000,
@@ -202,7 +272,7 @@
             // 
             // nudSecondaryAttack
             // 
-            this.nudSecondaryAttack.Location = new System.Drawing.Point(390, 217);
+            this.nudSecondaryAttack.Location = new System.Drawing.Point(390, 241);
             this.nudSecondaryAttack.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudSecondaryAttack.Maximum = new decimal(new int[] {
             30000,
@@ -215,7 +285,7 @@
             // 
             // nudPotion
             // 
-            this.nudPotion.Location = new System.Drawing.Point(390, 257);
+            this.nudPotion.Location = new System.Drawing.Point(390, 281);
             this.nudPotion.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudPotion.Maximum = new decimal(new int[] {
             30000,
@@ -228,7 +298,7 @@
             // 
             // nudDodge
             // 
-            this.nudDodge.Location = new System.Drawing.Point(390, 297);
+            this.nudDodge.Location = new System.Drawing.Point(390, 321);
             this.nudDodge.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudDodge.Maximum = new decimal(new int[] {
             30000,
@@ -243,7 +313,7 @@
             // 
             this.lblInstructions.AutoSize = true;
             this.lblInstructions.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblInstructions.Location = new System.Drawing.Point(126, 343);
+            this.lblInstructions.Location = new System.Drawing.Point(126, 367);
             this.lblInstructions.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblInstructions.Name = "lblInstructions";
             this.lblInstructions.Size = new System.Drawing.Size(251, 40);
@@ -253,7 +323,7 @@
             // btnKeyConfig
             // 
             this.btnKeyConfig.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnKeyConfig.Location = new System.Drawing.Point(173, 449);
+            this.btnKeyConfig.Location = new System.Drawing.Point(173, 473);
             this.btnKeyConfig.Name = "btnKeyConfig";
             this.btnKeyConfig.Size = new System.Drawing.Size(134, 29);
             this.btnKeyConfig.TabIndex = 17;
@@ -264,7 +334,7 @@
             // chkMouseMove
             // 
             this.chkMouseMove.AutoSize = true;
-            this.chkMouseMove.Location = new System.Drawing.Point(130, 419);
+            this.chkMouseMove.Location = new System.Drawing.Point(130, 443);
             this.chkMouseMove.Name = "chkMouseMove";
             this.chkMouseMove.Size = new System.Drawing.Size(255, 24);
             this.chkMouseMove.TabIndex = 19;
@@ -276,7 +346,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(532, 487);
+            this.ClientSize = new System.Drawing.Size(532, 511);
             this.Controls.Add(this.chkMouseMove);
             this.Controls.Add(this.btnKeyConfig);
             this.Controls.Add(this.lblInstructions);
@@ -296,14 +366,19 @@
             this.Controls.Add(this.lblSkill3);
             this.Controls.Add(this.lblSkill2);
             this.Controls.Add(this.lblSkill1);
+            this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "D4 Automator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill3)).EndInit();
@@ -338,5 +413,13 @@
         private System.Windows.Forms.Label lblInstructions;
         private System.Windows.Forms.Button btnKeyConfig;
         private System.Windows.Forms.CheckBox chkMouseMove;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadConfigurationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveConfigurationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem resetToDefaultsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }
 }

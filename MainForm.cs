@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using SharpDX.XInput;
 
@@ -66,6 +67,9 @@ namespace D4Automator
         private int currentStep = 0;
         private bool isMovingToTarget = false;
         private int currentDirection = 0; // 0=up, 1=down, 2=up-left, 3=down-right
+        
+        private bool hasUnsavedChanges = false;
+        private string currentFileName = string.Empty;
 
         public MainForm()
         {
@@ -152,11 +156,70 @@ namespace D4Automator
             nudSecondaryAttack.ValueChanged += nudLeftClick_ValueChanged;
             nudPotion.ValueChanged += nudPotion_ValueChanged;
             nudDodge.ValueChanged += nudDodge_ValueChanged;
+
+            // Add KeyDown event handlers to detect immediate changes
+            nudSkill1.KeyDown += NumericUpDown_KeyDown;
+            nudSkill2.KeyDown += NumericUpDown_KeyDown;
+            nudSkill3.KeyDown += NumericUpDown_KeyDown;
+            nudSkill4.KeyDown += NumericUpDown_KeyDown;
+            nudPrimaryAttack.KeyDown += NumericUpDown_KeyDown;
+            nudSecondaryAttack.KeyDown += NumericUpDown_KeyDown;
+            nudPotion.KeyDown += NumericUpDown_KeyDown;
+            nudDodge.KeyDown += NumericUpDown_KeyDown;
+        }
+
+        private void NumericUpDown_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Mark as changed when user types in numeric controls
+            // This will be more responsive than waiting for ValueChanged
+            if (char.IsDigit((char)e.KeyCode) || e.KeyCode == Keys.Back || e.KeyCode == Keys.Delete)
+            {
+                // Use a timer to mark as changed after a short delay
+                var timer = new System.Windows.Forms.Timer();
+                timer.Interval = 100; // Very short delay
+                timer.Tick += (s, args) =>
+                {
+                    timer.Stop();
+                    timer.Dispose();
+                    CheckForPendingChanges();
+                };
+                timer.Start();
+            }
         }
         private void SetFormTitle()
         {
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            this.Text = $"D4 Automator v{version.Major}.{version.Minor}.{version.Build}";
+            string baseTitle = $"D4 Automator v{version.Major}.{version.Minor}.{version.Build}";
+            
+            if (!string.IsNullOrEmpty(currentFileName))
+            {
+                baseTitle += $" - {Path.GetFileName(currentFileName)}";
+            }
+            
+            if (hasUnsavedChanges)
+            {
+                baseTitle += "*";
+            }
+            
+            this.Text = baseTitle;
+        }
+
+        private void MarkAsChanged()
+        {
+            if (!hasUnsavedChanges)
+            {
+                hasUnsavedChanges = true;
+                SetFormTitle();
+            }
+        }
+
+        private void MarkAsSaved()
+        {
+            if (hasUnsavedChanges)
+            {
+                hasUnsavedChanges = false;
+                SetFormTitle();
+            }
         }
 
         private void InitializeSettings()
@@ -175,6 +238,7 @@ namespace D4Automator
             }
 
             ApplySettingsToControls();
+            AutoLoadLastConfiguration();
         }
 
         private void CreateDefaultSettings()
@@ -211,6 +275,33 @@ namespace D4Automator
             using (FileStream stream = new FileStream(settingsPath, FileMode.Create))
             {
                 serializer.Serialize(stream, settings);
+            }
+        }
+
+        private void AutoLoadLastConfiguration()
+        {
+            if (!string.IsNullOrEmpty(settings.LastLoadedConfigFile) && File.Exists(settings.LastLoadedConfigFile))
+            {
+                try
+                {
+                    string jsonContent = File.ReadAllText(settings.LastLoadedConfigFile);
+                    var loadedSettings = DeserializeSettingsFromJson(jsonContent);
+                    
+                    // Preserve the LastLoadedConfigFile value
+                    loadedSettings.LastLoadedConfigFile = settings.LastLoadedConfigFile;
+                    
+                    settings = loadedSettings;
+                    currentFileName = settings.LastLoadedConfigFile;
+                    ApplySettingsToControls();
+                    UpdateKeyMappings();
+                    UpdateLabels();
+                    MarkAsSaved(); // Mark as saved since we just loaded
+                }
+                catch
+                {
+                    // If loading fails, just continue with current settings
+                    // Don't show error message on startup
+                }
             }
         }
 
@@ -674,53 +765,67 @@ namespace D4Automator
         private void nudSkill1_ValueChanged(object sender, EventArgs e)
         {
             settings.Skill1Delay = (int)nudSkill1.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudSkill2_ValueChanged(object sender, EventArgs e)
         {
             settings.Skill2Delay = (int)nudSkill2.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudSkill3_ValueChanged(object sender, EventArgs e)
         {
             settings.Skill3Delay = (int)nudSkill3.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudSkill4_ValueChanged(object sender, EventArgs e)
         {
             settings.Skill4Delay = (int)nudSkill4.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudRightClick_ValueChanged(object sender, EventArgs e)
         {
             settings.PrimaryAttackDelay = (int)nudPrimaryAttack.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudLeftClick_ValueChanged(object sender, EventArgs e)
         {
             settings.SecondaryAttackDelay = (int)nudSecondaryAttack.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudPotion_ValueChanged(object sender, EventArgs e)
         {
             settings.PotionDelay = (int)nudPotion.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void nudDodge_ValueChanged(object sender, EventArgs e)
         {
             settings.DodgeDelay = (int)nudDodge.Value;
+            MarkAsChanged();
             SaveSettings();
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (!PromptSaveChanges())
+            {
+                e.Cancel = true; // Cancel the closing if user cancels save operation
+                return;
+            }
+
             SaveSettings();
             UnregisterGlobalHotkey();
             UnregisterHotKey(this.Handle, 9001); // Unregister F4 hotkey
@@ -738,6 +843,7 @@ namespace D4Automator
             {
                 if (keyConfigForm.ShowDialog() == DialogResult.OK)
                 {
+                    MarkAsChanged();
                     SaveSettings();
                     UpdateKeyMappings();
                     UpdateLabels();
@@ -793,6 +899,311 @@ namespace D4Automator
             }
         }
 
+        private string SerializeSettingsToJson(Settings settings)
+        {
+            var json = new StringBuilder();
+            json.AppendLine("{");
+            json.AppendLine($"  \"Skill1Delay\": {settings.Skill1Delay},");
+            json.AppendLine($"  \"Skill2Delay\": {settings.Skill2Delay},");
+            json.AppendLine($"  \"Skill3Delay\": {settings.Skill3Delay},");
+            json.AppendLine($"  \"Skill4Delay\": {settings.Skill4Delay},");
+            json.AppendLine($"  \"PrimaryAttackDelay\": {settings.PrimaryAttackDelay},");
+            json.AppendLine($"  \"SecondaryAttackDelay\": {settings.SecondaryAttackDelay},");
+            json.AppendLine($"  \"PotionDelay\": {settings.PotionDelay},");
+            json.AppendLine($"  \"DodgeDelay\": {settings.DodgeDelay},");
+            json.AppendLine($"  \"Skill1Action\": \"{EscapeJsonString(settings.Skill1Action)}\",");
+            json.AppendLine($"  \"Skill2Action\": \"{EscapeJsonString(settings.Skill2Action)}\",");
+            json.AppendLine($"  \"Skill3Action\": \"{EscapeJsonString(settings.Skill3Action)}\",");
+            json.AppendLine($"  \"Skill4Action\": \"{EscapeJsonString(settings.Skill4Action)}\",");
+            json.AppendLine($"  \"PrimaryAttackAction\": \"{EscapeJsonString(settings.PrimaryAttackAction)}\",");
+            json.AppendLine($"  \"SecondaryAttackAction\": \"{EscapeJsonString(settings.SecondaryAttackAction)}\",");
+            json.AppendLine($"  \"PotionAction\": \"{EscapeJsonString(settings.PotionAction)}\",");
+            json.AppendLine($"  \"DodgeAction\": \"{EscapeJsonString(settings.DodgeAction)}\",");
+            json.AppendLine($"  \"ToggleAutomationAction\": \"{EscapeJsonString(settings.ToggleAutomationAction)}\",");
+            json.AppendLine($"  \"LastLoadedConfigFile\": \"{EscapeJsonString(settings.LastLoadedConfigFile)}\"");
+            json.AppendLine("}");
+            return json.ToString();
+        }
+
+        private string EscapeJsonString(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        private Settings DeserializeSettingsFromJson(string json)
+        {
+            var settings = new Settings();
+            
+            // Simple JSON parsing - split by lines and extract key-value pairs
+            var lines = json.Split('\n');
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim().TrimEnd(',');
+                if (trimmed.Contains(":"))
+                {
+                    var parts = trimmed.Split(new[] { ':' }, 2);
+                    if (parts.Length == 2)
+                    {
+                        var key = parts[0].Trim().Trim('"');
+                        var value = parts[1].Trim().Trim('"');
+                        
+                        switch (key)
+                        {
+                            case "Skill1Delay":
+                                if (int.TryParse(value, out int skill1Delay)) settings.Skill1Delay = skill1Delay;
+                                break;
+                            case "Skill2Delay":
+                                if (int.TryParse(value, out int skill2Delay)) settings.Skill2Delay = skill2Delay;
+                                break;
+                            case "Skill3Delay":
+                                if (int.TryParse(value, out int skill3Delay)) settings.Skill3Delay = skill3Delay;
+                                break;
+                            case "Skill4Delay":
+                                if (int.TryParse(value, out int skill4Delay)) settings.Skill4Delay = skill4Delay;
+                                break;
+                            case "PrimaryAttackDelay":
+                                if (int.TryParse(value, out int primaryDelay)) settings.PrimaryAttackDelay = primaryDelay;
+                                break;
+                            case "SecondaryAttackDelay":
+                                if (int.TryParse(value, out int secondaryDelay)) settings.SecondaryAttackDelay = secondaryDelay;
+                                break;
+                            case "PotionDelay":
+                                if (int.TryParse(value, out int potionDelay)) settings.PotionDelay = potionDelay;
+                                break;
+                            case "DodgeDelay":
+                                if (int.TryParse(value, out int dodgeDelay)) settings.DodgeDelay = dodgeDelay;
+                                break;
+                            case "Skill1Action":
+                                settings.Skill1Action = value;
+                                break;
+                            case "Skill2Action":
+                                settings.Skill2Action = value;
+                                break;
+                            case "Skill3Action":
+                                settings.Skill3Action = value;
+                                break;
+                            case "Skill4Action":
+                                settings.Skill4Action = value;
+                                break;
+                            case "PrimaryAttackAction":
+                                settings.PrimaryAttackAction = value;
+                                break;
+                            case "SecondaryAttackAction":
+                                settings.SecondaryAttackAction = value;
+                                break;
+                            case "PotionAction":
+                                settings.PotionAction = value;
+                                break;
+                            case "DodgeAction":
+                                settings.DodgeAction = value;
+                                break;
+                            case "ToggleAutomationAction":
+                                settings.ToggleAutomationAction = value;
+                                break;
+                            case "LastLoadedConfigFile":
+                                settings.LastLoadedConfigFile = value;
+                                break;
+                        }
+                    }
+                }
+            }
+            
+            return settings;
+        }
+
+        private void loadConfigurationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckForPendingChanges(); // Check for pending changes first
+            if (!PromptSaveChanges())
+                return; // User cancelled, don't continue with load
+
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                openFileDialog.DefaultExt = "json";
+                openFileDialog.Title = "Load Configuration";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string jsonContent = File.ReadAllText(openFileDialog.FileName);
+                        var loadedSettings = DeserializeSettingsFromJson(jsonContent);
+                        
+                        settings = loadedSettings;
+                        settings.LastLoadedConfigFile = openFileDialog.FileName; // Store for autoload
+                        currentFileName = openFileDialog.FileName;
+                        ApplySettingsToControls();
+                        UpdateKeyMappings();
+                        UpdateLabels();
+                        SaveSettings(); // Save to XML as well
+                        MarkAsSaved(); // Mark as saved since we just loaded
+                        
+                        MessageBox.Show("Configuration loaded successfully!", "Load Configuration", 
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error loading configuration: {ex.Message}", "Load Configuration Error", 
+                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void saveConfigurationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                saveFileDialog.DefaultExt = "json";
+                saveFileDialog.Title = "Save Configuration";
+                saveFileDialog.FileName = "D4AutomatorConfig.json";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string jsonContent = SerializeSettingsToJson(settings);
+                        File.WriteAllText(saveFileDialog.FileName, jsonContent);
+                        currentFileName = saveFileDialog.FileName;
+                        MarkAsSaved();
+                        
+                        MessageBox.Show("Configuration saved successfully!", "Save Configuration", 
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error saving configuration: {ex.Message}", "Save Configuration Error", 
+                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void resetToDefaultsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckForPendingChanges(); // Check for pending changes first
+            if (!PromptSaveChanges())
+                return; // User cancelled, don't continue with reset
+
+            if (MessageBox.Show("This will reset all delays to their default values. Continue?", 
+                              "Reset to Defaults", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                // Set default values: 1000 for skills/attacks, 0 for potion and dodge
+                settings.Skill1Delay = 1000;
+                settings.Skill2Delay = 1000;
+                settings.Skill3Delay = 1000;
+                settings.Skill4Delay = 1000;
+                settings.PrimaryAttackDelay = 1000;
+                settings.SecondaryAttackDelay = 1000;
+                settings.PotionDelay = 0;
+                settings.DodgeDelay = 0;
+                
+                ApplySettingsToControls();
+                MarkAsChanged();
+                SaveSettings();
+                
+                MessageBox.Show("Settings have been reset to defaults.", "Reset Complete", 
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void CheckForPendingChanges()
+        {
+            // Check if any numeric controls have different values than stored settings
+            // This catches changes where user typed but didn't exit the field
+            if ((int)nudSkill1.Value != settings.Skill1Delay ||
+                (int)nudSkill2.Value != settings.Skill2Delay ||
+                (int)nudSkill3.Value != settings.Skill3Delay ||
+                (int)nudSkill4.Value != settings.Skill4Delay ||
+                (int)nudPrimaryAttack.Value != settings.PrimaryAttackDelay ||
+                (int)nudSecondaryAttack.Value != settings.SecondaryAttackDelay ||
+                (int)nudPotion.Value != settings.PotionDelay ||
+                (int)nudDodge.Value != settings.DodgeDelay)
+            {
+                // Force validation of all controls to trigger ValueChanged events
+                this.ValidateChildren();
+                MarkAsChanged();
+            }
+        }
+
+        private bool PromptSaveChanges()
+        {
+            CheckForPendingChanges(); // Check for any pending changes first
+            
+            if (hasUnsavedChanges)
+            {
+                var result = MessageBox.Show("You have unsaved changes. Do you want to save them?", 
+                                           "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        if (!string.IsNullOrEmpty(currentFileName))
+                        {
+                            try
+                            {
+                                string jsonContent = SerializeSettingsToJson(settings);
+                                File.WriteAllText(currentFileName, jsonContent);
+                                MarkAsSaved();
+                                return true;
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Error saving file: {ex.Message}", "Save Error", 
+                                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            // Show save dialog
+                            using (var saveFileDialog = new SaveFileDialog())
+                            {
+                                saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                                saveFileDialog.DefaultExt = "json";
+                                saveFileDialog.Title = "Save Configuration";
+                                saveFileDialog.FileName = "D4AutomatorConfig.json";
+
+                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                                {
+                                    try
+                                    {
+                                        string jsonContent = SerializeSettingsToJson(settings);
+                                        File.WriteAllText(saveFileDialog.FileName, jsonContent);
+                                        currentFileName = saveFileDialog.FileName;
+                                        MarkAsSaved();
+                                        return true;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        MessageBox.Show($"Error saving configuration: {ex.Message}", "Save Configuration Error", 
+                                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    return false; // User cancelled save dialog
+                                }
+                            }
+                        }
+                    case DialogResult.No:
+                        return true; // Don't save, but continue
+                    case DialogResult.Cancel:
+                        return false; // Cancel the operation
+                }
+            }
+            return true; // No changes to save
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
        
     }
 
@@ -816,6 +1227,7 @@ namespace D4Automator
         public string PotionAction { get; set; }
         public string DodgeAction { get; set; }
         public string ToggleAutomationAction { get; set; }
+        public string LastLoadedConfigFile { get; set; }
 
         public Settings()
         {
