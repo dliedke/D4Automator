@@ -253,7 +253,7 @@
             // btnKeyConfig
             // 
             this.btnKeyConfig.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnKeyConfig.Location = new System.Drawing.Point(173, 423);
+            this.btnKeyConfig.Location = new System.Drawing.Point(173, 449);
             this.btnKeyConfig.Name = "btnKeyConfig";
             this.btnKeyConfig.Size = new System.Drawing.Size(134, 29);
             this.btnKeyConfig.TabIndex = 17;
@@ -264,7 +264,7 @@
             // chkMouseMove
             // 
             this.chkMouseMove.AutoSize = true;
-            this.chkMouseMove.Location = new System.Drawing.Point(130, 393);
+            this.chkMouseMove.Location = new System.Drawing.Point(130, 419);
             this.chkMouseMove.Name = "chkMouseMove";
             this.chkMouseMove.Size = new System.Drawing.Size(255, 24);
             this.chkMouseMove.TabIndex = 19;
@@ -276,7 +276,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(532, 460);
+            this.ClientSize = new System.Drawing.Size(532, 487);
             this.Controls.Add(this.chkMouseMove);
             this.Controls.Add(this.btnKeyConfig);
             this.Controls.Add(this.lblInstructions);

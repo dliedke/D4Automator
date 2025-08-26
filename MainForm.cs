@@ -47,6 +47,8 @@ namespace D4Automator
         private Settings settings;
         private string settingsPath;
         private CancellationTokenSource cancellationTokenSource;
+        private HashSet<Keys> heldKeys = new HashSet<Keys>();
+        private HashSet<MouseButtons> heldMouseButtons = new HashSet<MouseButtons>();
 
         private Controller controller;
         private System.Windows.Forms.Timer controllerCheckTimer;
@@ -235,7 +237,7 @@ namespace D4Automator
             lblPotion.Text = $"Potion ({GetDisplayTextForKey(settings.PotionAction)}) Delay (ms):";
             lblDodge.Text = $"Dodge ({GetDisplayTextForKey(settings.DodgeAction)}) Delay (ms):";
 
-            lblInstructions.Text = $"Press {GetDisplayTextForKey(settings.ToggleAutomationAction)} to start/stop automation.\r\nSet delay to 0 to disable an action.";
+            lblInstructions.Text = $"Press {GetDisplayTextForKey(settings.ToggleAutomationAction)} to start/stop automation.\r\nSet delay to 0 to disable an action.\r\nSet delay to 1 to keep button/key pressed.";
         }
 
         private string GetDisplayTextForKey(string keyString)
@@ -467,6 +469,7 @@ namespace D4Automator
             {
                 cancellationTokenSource?.Cancel();
                 isRunning = false;
+                ReleaseHeldInputs();
             }
         }
 
@@ -499,9 +502,18 @@ namespace D4Automator
 
         private async Task RunActionLoop(int delay, Action action, CancellationToken cancellationToken)
         {
+            bool buttonHeld = false;
+            
             while (!cancellationToken.IsCancellationRequested)
             {
-                if (delay > 0)
+                if (delay == 1 && !buttonHeld)
+                {
+                    // Hold button pressed when delay is 1
+                    action();
+                    buttonHeld = true;
+                    await Task.Delay(50, cancellationToken);
+                }
+                else if (delay > 1)
                 {
                     action();
                     await Task.Delay(delay, cancellationToken);
@@ -513,24 +525,31 @@ namespace D4Automator
             }
         }
 
-        private void SimulateKeyPress(Keys key)
+        private void SimulateKeyPress(Keys key, bool holdKey = false)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => SimulateKeyPress(key)));
+                Invoke(new Action(() => SimulateKeyPress(key, holdKey)));
                 return;
             }
 
             byte vk = (byte)key;
             keybd_event(vk, 0, 0, UIntPtr.Zero);
-            keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if (!holdKey)
+            {
+                keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+            else
+            {
+                heldKeys.Add(key);
+            }
         }
 
-        private void SimulateMouseClick(MouseButtons button)
+        private void SimulateMouseClick(MouseButtons button, bool holdButton = false)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => SimulateMouseClick(button)));
+                Invoke(new Action(() => SimulateMouseClick(button, holdButton)));
                 return;
             }
 
@@ -568,7 +587,58 @@ namespace D4Automator
             }
 
             mouse_event(downFlag, 0, 0, mouseData, 0);
-            mouse_event(upFlag, 0, 0, mouseData, 0);
+            if (!holdButton)
+            {
+                mouse_event(upFlag, 0, 0, mouseData, 0);
+            }
+            else
+            {
+                heldMouseButtons.Add(button);
+            }
+        }
+
+        private void ReleaseHeldInputs()
+        {
+            // Release all held keys
+            foreach (var key in heldKeys)
+            {
+                byte vk = (byte)key;
+                keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+            heldKeys.Clear();
+
+            // Release all held mouse buttons
+            foreach (var button in heldMouseButtons)
+            {
+                int upFlag;
+                int mouseData = 0;
+
+                switch (button)
+                {
+                    case MouseButtons.Left:
+                        upFlag = MOUSEEVENTF_LEFTUP;
+                        break;
+                    case MouseButtons.Right:
+                        upFlag = MOUSEEVENTF_RIGHTUP;
+                        break;
+                    case MouseButtons.Middle:
+                        upFlag = MOUSEEVENTF_MIDDLEUP;
+                        break;
+                    case MouseButtons.XButton1:
+                        upFlag = MOUSEEVENTF_XUP;
+                        mouseData = XBUTTON1;
+                        break;
+                    case MouseButtons.XButton2:
+                        upFlag = MOUSEEVENTF_XUP;
+                        mouseData = XBUTTON2;
+                        break;
+                    default:
+                        continue;
+                }
+
+                mouse_event(upFlag, 0, 0, mouseData, 0);
+            }
+            heldMouseButtons.Clear();
         }
 
         private void RegisterGlobalHotkey()
@@ -654,6 +724,7 @@ namespace D4Automator
             SaveSettings();
             UnregisterGlobalHotkey();
             UnregisterHotKey(this.Handle, 9001); // Unregister F4 hotkey
+            ReleaseHeldInputs(); // Release any held inputs before closing
 
             controllerCheckTimer?.Stop();
             controllerCheckTimer?.Dispose();
@@ -678,14 +749,14 @@ namespace D4Automator
         {
             keyMappings = new Dictionary<string, Action>
             {
-                {"Skill1", () => SimulateAction(settings.Skill1Action)},
-                {"Skill2", () => SimulateAction(settings.Skill2Action)},
-                {"Skill3", () => SimulateAction(settings.Skill3Action)},
-                {"Skill4", () => SimulateAction(settings.Skill4Action)},
-                {"PrimaryAttack", () => SimulateAction(settings.PrimaryAttackAction)},
-                {"SecondaryAttack", () => SimulateAction(settings.SecondaryAttackAction)},
-                {"Potion", () => SimulateAction(settings.PotionAction)},
-                {"Dodge", () => SimulateAction(settings.DodgeAction)}
+                {"Skill1", () => SimulateAction(settings.Skill1Action, settings.Skill1Delay == 1)},
+                {"Skill2", () => SimulateAction(settings.Skill2Action, settings.Skill2Delay == 1)},
+                {"Skill3", () => SimulateAction(settings.Skill3Action, settings.Skill3Delay == 1)},
+                {"Skill4", () => SimulateAction(settings.Skill4Action, settings.Skill4Delay == 1)},
+                {"PrimaryAttack", () => SimulateAction(settings.PrimaryAttackAction, settings.PrimaryAttackDelay == 1)},
+                {"SecondaryAttack", () => SimulateAction(settings.SecondaryAttackAction, settings.SecondaryAttackDelay == 1)},
+                {"Potion", () => SimulateAction(settings.PotionAction, settings.PotionDelay == 1)},
+                {"Dodge", () => SimulateAction(settings.DodgeAction, settings.DodgeDelay == 1)}
             };
 
             RegisterGlobalHotkey();
@@ -694,29 +765,29 @@ namespace D4Automator
         // Add this field to the MainForm class
         private Dictionary<string, Action> keyMappings;
 
-        private void SimulateAction(string action)
+        private void SimulateAction(string action, bool holdAction = false)
         {
             switch (action)
             {
                 case "LeftClick":
-                    SimulateMouseClick(MouseButtons.Left);
+                    SimulateMouseClick(MouseButtons.Left, holdAction);
                     break;
                 case "RightClick":
-                    SimulateMouseClick(MouseButtons.Right);
+                    SimulateMouseClick(MouseButtons.Right, holdAction);
                     break;
                 case "MiddleClick":
-                    SimulateMouseClick(MouseButtons.Middle);
+                    SimulateMouseClick(MouseButtons.Middle, holdAction);
                     break;
                 case "MouseBack":
-                    SimulateMouseClick(MouseButtons.XButton1);
+                    SimulateMouseClick(MouseButtons.XButton1, holdAction);
                     break;
                 case "MouseForward":
-                    SimulateMouseClick(MouseButtons.XButton2);
+                    SimulateMouseClick(MouseButtons.XButton2, holdAction);
                     break;
                 default:
                     if (Enum.TryParse(action, out Keys key))
                     {
-                        SimulateKeyPress(key);
+                        SimulateKeyPress(key, holdAction);
                     }
                     break;
             }
