@@ -70,6 +70,7 @@ namespace D4Automator
         
         private bool hasUnsavedChanges = false;
         private string currentFileName = string.Empty;
+        private string recentFilesPath;
 
         public MainForm()
         {
@@ -82,6 +83,14 @@ namespace D4Automator
             SetFormTitle();
             UpdateLabels();
             InitializeControllerDetection();
+            
+            // Update recent files menu after form is loaded
+            this.Load += MainForm_Load;
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            UpdateRecentFilesMenu();
         }
 
         private void InitializeControllerDetection()
@@ -227,6 +236,7 @@ namespace D4Automator
             string executablePath = Assembly.GetExecutingAssembly().Location;
             string executableDirectory = Path.GetDirectoryName(executablePath);
             settingsPath = Path.Combine(executableDirectory, "D4AutomatorSettings.xml");
+            recentFilesPath = Path.Combine(executableDirectory, "RecentFiles.txt");
 
             if (File.Exists(settingsPath))
             {
@@ -265,8 +275,10 @@ namespace D4Automator
             {
                 settings = (Settings)serializer.Deserialize(stream);
             }
+            
+                
             UpdateKeyMappings();
-            UpdateLabels(); // Add this line
+            UpdateLabels();
         }
 
         private void SaveSettings()
@@ -1040,8 +1052,8 @@ namespace D4Automator
                         SaveSettings(); // Save to XML as well
                         MarkAsSaved(); // Mark as saved since we just loaded
                         
-                        MessageBox.Show("Configuration loaded successfully!", "Load Configuration", 
-                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        AddToRecentFiles(openFileDialog.FileName);
+                        
                     }
                     catch (Exception ex)
                     {
@@ -1069,6 +1081,8 @@ namespace D4Automator
                         File.WriteAllText(saveFileDialog.FileName, jsonContent);
                         currentFileName = saveFileDialog.FileName;
                         MarkAsSaved();
+                        
+                        AddToRecentFiles(saveFileDialog.FileName);
                         
                         MessageBox.Show("Configuration saved successfully!", "Save Configuration", 
                                       MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -1202,6 +1216,158 @@ namespace D4Automator
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void AddToRecentFiles(string filePath)
+        {
+            var recentFiles = LoadRecentFiles();
+
+            // Remove if already exists
+            recentFiles.Remove(filePath);
+            
+            // Add to beginning
+            recentFiles.Insert(0, filePath);
+            
+            // Keep only 5 most recent
+            if (recentFiles.Count > 5)
+            {
+                recentFiles.RemoveAt(5);
+            }
+            
+            SaveRecentFiles(recentFiles);
+            UpdateRecentFilesMenu();
+        }
+
+        private List<string> LoadRecentFiles()
+        {
+            var recentFiles = new List<string>();
+            
+            if (File.Exists(recentFilesPath))
+            {
+                try
+                {
+                    var lines = File.ReadAllLines(recentFilesPath);
+                    foreach (var line in lines)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line) && File.Exists(line))
+                        {
+                            recentFiles.Add(line.Trim());
+                        }
+                    }
+                }
+                catch
+                {
+                    // If file is corrupted, start fresh
+                }
+            }
+            
+            return recentFiles;
+        }
+
+        private void SaveRecentFiles(List<string> recentFiles)
+        {
+            try
+            {
+                File.WriteAllLines(recentFilesPath, recentFiles);
+            }
+            catch
+            {
+                // Ignore save errors for recent files
+            }
+        }
+
+        private void UpdateRecentFilesMenu()
+        {
+            // Remove existing recent file menu items
+            var itemsToRemove = new List<ToolStripItem>();
+            foreach (ToolStripItem item in fileToolStripMenuItem.DropDownItems)
+            {
+                if (item.Tag?.ToString() == "RecentFile" || item.Tag?.ToString().StartsWith("RecentFile:") == true)
+                {
+                    itemsToRemove.Add(item);
+                }
+            }
+            foreach (var item in itemsToRemove)
+            {
+                fileToolStripMenuItem.DropDownItems.Remove(item);
+            }
+
+            // Load recent files from text file
+            var recentFiles = LoadRecentFiles();
+            
+            // Add recent files if any exist
+            if (recentFiles.Count > 0)
+            {
+                // Find the position after "Save Configuration..."
+                int insertIndex = fileToolStripMenuItem.DropDownItems.IndexOf(saveConfigurationToolStripMenuItem) + 1;
+                
+                // Add separator
+                var separator = new ToolStripSeparator();
+                separator.Tag = "RecentFile";
+                fileToolStripMenuItem.DropDownItems.Insert(insertIndex, separator);
+                insertIndex++;
+
+                // Add recent files
+                for (int i = 0; i < recentFiles.Count; i++)
+                {
+                    string filePath = recentFiles[i];
+                    var menuItem = new ToolStripMenuItem();
+                    menuItem.Text = $"&{i + 1} {Path.GetFileName(filePath)}";
+                    menuItem.ToolTipText = filePath;
+                    
+                    // Store the path in the Tag along with a marker
+                    menuItem.Tag = $"RecentFile:{filePath}";
+                    menuItem.Click += RecentFileMenuItem_Click;
+                    
+                    fileToolStripMenuItem.DropDownItems.Insert(insertIndex, menuItem);
+                    insertIndex++;
+                }
+            }
+        }
+
+        private void RecentFileMenuItem_Click(object sender, EventArgs e)
+        {
+            var menuItem = sender as ToolStripMenuItem;
+            if (menuItem?.Tag?.ToString().StartsWith("RecentFile:") == true)
+            {
+                string filePath = menuItem.Tag.ToString().Substring("RecentFile:".Length);
+                LoadRecentFile(filePath);
+            }
+        }
+
+        private void LoadRecentFile(string filePath)
+        {
+            CheckForPendingChanges();
+            if (!PromptSaveChanges())
+                return;
+
+            try
+            {
+                string jsonContent = File.ReadAllText(filePath);
+                var loadedSettings = DeserializeSettingsFromJson(jsonContent);
+                
+                settings = loadedSettings;
+                settings.LastLoadedConfigFile = filePath;
+                currentFileName = filePath;
+                ApplySettingsToControls();
+                UpdateKeyMappings();
+                UpdateLabels();
+                SaveSettings();
+                MarkAsSaved();
+                
+                AddToRecentFiles(filePath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading configuration: {ex.Message}", "Load Configuration Error", 
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // Remove from recent files if it failed to load
+                var recentFiles = LoadRecentFiles();
+                recentFiles.Remove(filePath);
+                SaveRecentFiles(recentFiles);
+                UpdateRecentFilesMenu();
+            }
         }
 
        
