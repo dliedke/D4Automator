@@ -32,6 +32,7 @@
             this.lblSkill4 = new System.Windows.Forms.Label();
             this.lblPrimaryAttack = new System.Windows.Forms.Label();
             this.lblSecondaryAttack = new System.Windows.Forms.Label();
+            this.lblMove = new System.Windows.Forms.Label();
             this.lblPotion = new System.Windows.Forms.Label();
             this.lblDodge = new System.Windows.Forms.Label();
             this.nudSkill1 = new System.Windows.Forms.NumericUpDown();
@@ -40,6 +41,7 @@
             this.nudSkill4 = new System.Windows.Forms.NumericUpDown();
             this.nudPrimaryAttack = new System.Windows.Forms.NumericUpDown();
             this.nudSecondaryAttack = new System.Windows.Forms.NumericUpDown();
+            this.nudMove = new System.Windows.Forms.NumericUpDown();
             this.nudPotion = new System.Windows.Forms.NumericUpDown();
             this.nudDodge = new System.Windows.Forms.NumericUpDown();
             this.lblInstructions = new System.Windows.Forms.Label();
@@ -52,6 +54,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPrimaryAttack)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSecondaryAttack)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudMove)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPotion)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDodge)).BeginInit();
             this.SuspendLayout();
@@ -183,26 +186,37 @@
             this.lblSecondaryAttack.TabIndex = 5;
             this.lblSecondaryAttack.Text = "Secondary Attack Delay (ms):";
             // 
+            // lblMove
+            //
+            this.lblMove.AutoSize = true;
+            this.lblMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMove.Location = new System.Drawing.Point(18, 287);
+            this.lblMove.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblMove.Name = "lblMove";
+            this.lblMove.Size = new System.Drawing.Size(156, 20);
+            this.lblMove.TabIndex = 6;
+            this.lblMove.Text = "Move Delay (ms):";
+            //
             // lblPotion
-            // 
+            //
             this.lblPotion.AutoSize = true;
             this.lblPotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPotion.Location = new System.Drawing.Point(18, 287);
+            this.lblPotion.Location = new System.Drawing.Point(18, 327);
             this.lblPotion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblPotion.Name = "lblPotion";
             this.lblPotion.Size = new System.Drawing.Size(163, 20);
-            this.lblPotion.TabIndex = 6;
+            this.lblPotion.TabIndex = 7;
             this.lblPotion.Text = "Potion (Q) Delay (ms):";
-            // 
+            //
             // lblDodge
-            // 
+            //
             this.lblDodge.AutoSize = true;
             this.lblDodge.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDodge.Location = new System.Drawing.Point(18, 327);
+            this.lblDodge.Location = new System.Drawing.Point(18, 367);
             this.lblDodge.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblDodge.Name = "lblDodge";
             this.lblDodge.Size = new System.Drawing.Size(200, 20);
-            this.lblDodge.TabIndex = 7;
+            this.lblDodge.TabIndex = 8;
             this.lblDodge.Text = "Dodge (Space) Delay (ms):";
             // 
             // nudSkill1
@@ -283,9 +297,22 @@
             this.nudSecondaryAttack.Size = new System.Drawing.Size(105, 26);
             this.nudSecondaryAttack.TabIndex = 13;
             // 
+            // nudMove
+            //
+            this.nudMove.Location = new System.Drawing.Point(390, 281);
+            this.nudMove.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.nudMove.Maximum = new decimal(new int[] {
+            30000,
+            0,
+            0,
+            0});
+            this.nudMove.Name = "nudMove";
+            this.nudMove.Size = new System.Drawing.Size(105, 26);
+            this.nudMove.TabIndex = 14;
+            //
             // nudPotion
-            // 
-            this.nudPotion.Location = new System.Drawing.Point(390, 281);
+            //
+            this.nudPotion.Location = new System.Drawing.Point(390, 321);
             this.nudPotion.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudPotion.Maximum = new decimal(new int[] {
             30000,
@@ -294,11 +321,11 @@
             0});
             this.nudPotion.Name = "nudPotion";
             this.nudPotion.Size = new System.Drawing.Size(105, 26);
-            this.nudPotion.TabIndex = 14;
-            // 
+            this.nudPotion.TabIndex = 15;
+            //
             // nudDodge
-            // 
-            this.nudDodge.Location = new System.Drawing.Point(390, 321);
+            //
+            this.nudDodge.Location = new System.Drawing.Point(390, 361);
             this.nudDodge.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudDodge.Maximum = new decimal(new int[] {
             30000,
@@ -307,51 +334,52 @@
             0});
             this.nudDodge.Name = "nudDodge";
             this.nudDodge.Size = new System.Drawing.Size(105, 26);
-            this.nudDodge.TabIndex = 15;
+            this.nudDodge.TabIndex = 16;
             // 
             // lblInstructions
-            // 
+            //
             this.lblInstructions.AutoSize = true;
             this.lblInstructions.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblInstructions.Location = new System.Drawing.Point(126, 367);
+            this.lblInstructions.Location = new System.Drawing.Point(126, 407);
             this.lblInstructions.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblInstructions.Name = "lblInstructions";
             this.lblInstructions.Size = new System.Drawing.Size(251, 40);
-            this.lblInstructions.TabIndex = 16;
+            this.lblInstructions.TabIndex = 17;
             this.lblInstructions.Text = "Press F5 to start/stop automation.\r\nSet delay to 0 to disable an action.";
-            // 
+            //
             // btnKeyConfig
-            // 
+            //
             this.btnKeyConfig.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnKeyConfig.Location = new System.Drawing.Point(173, 473);
+            this.btnKeyConfig.Location = new System.Drawing.Point(173, 513);
             this.btnKeyConfig.Name = "btnKeyConfig";
             this.btnKeyConfig.Size = new System.Drawing.Size(134, 29);
-            this.btnKeyConfig.TabIndex = 17;
+            this.btnKeyConfig.TabIndex = 18;
             this.btnKeyConfig.Text = "Configure Keys";
             this.btnKeyConfig.UseVisualStyleBackColor = true;
             this.btnKeyConfig.Click += new System.EventHandler(this.btnKeyConfig_Click);
-            // 
+            //
             // chkMouseMove
-            // 
+            //
             this.chkMouseMove.AutoSize = true;
-            this.chkMouseMove.Location = new System.Drawing.Point(130, 443);
+            this.chkMouseMove.Location = new System.Drawing.Point(130, 483);
             this.chkMouseMove.Name = "chkMouseMove";
             this.chkMouseMove.Size = new System.Drawing.Size(255, 24);
             this.chkMouseMove.TabIndex = 19;
             this.chkMouseMove.Text = "Mouse move for Infernal Hordes";
             this.chkMouseMove.UseVisualStyleBackColor = true;
             this.chkMouseMove.CheckedChanged += new System.EventHandler(this.chkMouseMove_CheckedChanged);
-            // 
+            //
             // MainForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(532, 511);
+            this.ClientSize = new System.Drawing.Size(532, 551);
             this.Controls.Add(this.chkMouseMove);
             this.Controls.Add(this.btnKeyConfig);
             this.Controls.Add(this.lblInstructions);
             this.Controls.Add(this.nudDodge);
             this.Controls.Add(this.nudPotion);
+            this.Controls.Add(this.nudMove);
             this.Controls.Add(this.nudSecondaryAttack);
             this.Controls.Add(this.nudPrimaryAttack);
             this.Controls.Add(this.nudSkill4);
@@ -360,6 +388,7 @@
             this.Controls.Add(this.nudSkill1);
             this.Controls.Add(this.lblDodge);
             this.Controls.Add(this.lblPotion);
+            this.Controls.Add(this.lblMove);
             this.Controls.Add(this.lblSecondaryAttack);
             this.Controls.Add(this.lblPrimaryAttack);
             this.Controls.Add(this.lblSkill4);
@@ -385,6 +414,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPrimaryAttack)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSecondaryAttack)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudMove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPotion)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDodge)).EndInit();
             this.ResumeLayout(false);
@@ -400,6 +430,7 @@
         private System.Windows.Forms.Label lblSkill4;
         private System.Windows.Forms.Label lblPrimaryAttack;
         private System.Windows.Forms.Label lblSecondaryAttack;
+        private System.Windows.Forms.Label lblMove;
         private System.Windows.Forms.Label lblPotion;
         private System.Windows.Forms.Label lblDodge;
         private System.Windows.Forms.NumericUpDown nudSkill1;
@@ -408,6 +439,7 @@
         private System.Windows.Forms.NumericUpDown nudSkill4;
         private System.Windows.Forms.NumericUpDown nudPrimaryAttack;
         private System.Windows.Forms.NumericUpDown nudSecondaryAttack;
+        private System.Windows.Forms.NumericUpDown nudMove;
         private System.Windows.Forms.NumericUpDown nudPotion;
         private System.Windows.Forms.NumericUpDown nudDodge;
         private System.Windows.Forms.Label lblInstructions;

@@ -45,6 +45,7 @@ namespace D4Automator
                 {"Skill4Action", txtSkill4},
                 {"PrimaryAttackAction", txtPrimaryAttack},
                 {"SecondaryAttackAction", txtSecondaryAttack},
+                {"MoveAction", txtMove},
                 {"PotionAction", txtPotion},
                 {"DodgeAction", txtDodge},
                 {"ToggleAutomationAction", txtToggleAutomation}

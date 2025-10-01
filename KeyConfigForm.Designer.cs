@@ -35,6 +35,7 @@
             this.lblSkill4 = new System.Windows.Forms.Label();
             this.lblPrimaryAttack = new System.Windows.Forms.Label();
             this.lblSecondaryAttack = new System.Windows.Forms.Label();
+            this.lblMove = new System.Windows.Forms.Label();
             this.lblPotion = new System.Windows.Forms.Label();
             this.lblDodge = new System.Windows.Forms.Label();
             this.lblToggleAutomation = new System.Windows.Forms.Label();
@@ -44,6 +45,7 @@
             this.txtSkill4 = new System.Windows.Forms.TextBox();
             this.txtPrimaryAttack = new System.Windows.Forms.TextBox();
             this.txtSecondaryAttack = new System.Windows.Forms.TextBox();
+            this.txtMove = new System.Windows.Forms.TextBox();
             this.txtPotion = new System.Windows.Forms.TextBox();
             this.txtDodge = new System.Windows.Forms.TextBox();
             this.txtToggleAutomation = new System.Windows.Forms.TextBox();
@@ -112,34 +114,44 @@
             this.lblSecondaryAttack.TabIndex = 5;
             this.lblSecondaryAttack.Text = "Secondary Attack:";
             // 
+            // lblMove
+            //
+            this.lblMove.AutoSize = true;
+            this.lblMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMove.Location = new System.Drawing.Point(14, 248);
+            this.lblMove.Name = "lblMove";
+            this.lblMove.Size = new System.Drawing.Size(52, 20);
+            this.lblMove.TabIndex = 6;
+            this.lblMove.Text = "Move:";
+            //
             // lblPotion
-            // 
+            //
             this.lblPotion.AutoSize = true;
             this.lblPotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPotion.Location = new System.Drawing.Point(14, 248);
+            this.lblPotion.Location = new System.Drawing.Point(14, 278);
             this.lblPotion.Name = "lblPotion";
             this.lblPotion.Size = new System.Drawing.Size(58, 20);
-            this.lblPotion.TabIndex = 6;
+            this.lblPotion.TabIndex = 7;
             this.lblPotion.Text = "Potion:";
-            // 
+            //
             // lblDodge
-            // 
+            //
             this.lblDodge.AutoSize = true;
             this.lblDodge.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDodge.Location = new System.Drawing.Point(14, 278);
+            this.lblDodge.Location = new System.Drawing.Point(14, 308);
             this.lblDodge.Name = "lblDodge";
             this.lblDodge.Size = new System.Drawing.Size(61, 20);
-            this.lblDodge.TabIndex = 7;
+            this.lblDodge.TabIndex = 8;
             this.lblDodge.Text = "Dodge:";
-            // 
+            //
             // lblToggleAutomation
-            // 
+            //
             this.lblToggleAutomation.AutoSize = true;
             this.lblToggleAutomation.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblToggleAutomation.Location = new System.Drawing.Point(14, 308);
+            this.lblToggleAutomation.Location = new System.Drawing.Point(14, 338);
             this.lblToggleAutomation.Name = "lblToggleAutomation";
             this.lblToggleAutomation.Size = new System.Drawing.Size(147, 20);
-            this.lblToggleAutomation.TabIndex = 8;
+            this.lblToggleAutomation.TabIndex = 9;
             this.lblToggleAutomation.Text = "Toggle Automation:";
             // 
             // txtSkill1
@@ -190,48 +202,56 @@
             this.txtSecondaryAttack.Size = new System.Drawing.Size(176, 26);
             this.txtSecondaryAttack.TabIndex = 14;
             // 
+            // txtMove
+            //
+            this.txtMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtMove.Location = new System.Drawing.Point(169, 245);
+            this.txtMove.Name = "txtMove";
+            this.txtMove.Size = new System.Drawing.Size(176, 26);
+            this.txtMove.TabIndex = 15;
+            //
             // txtPotion
-            // 
+            //
             this.txtPotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPotion.Location = new System.Drawing.Point(169, 245);
+            this.txtPotion.Location = new System.Drawing.Point(169, 275);
             this.txtPotion.Name = "txtPotion";
             this.txtPotion.Size = new System.Drawing.Size(176, 26);
-            this.txtPotion.TabIndex = 15;
-            // 
+            this.txtPotion.TabIndex = 16;
+            //
             // txtDodge
-            // 
+            //
             this.txtDodge.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDodge.Location = new System.Drawing.Point(169, 275);
+            this.txtDodge.Location = new System.Drawing.Point(169, 305);
             this.txtDodge.Name = "txtDodge";
             this.txtDodge.Size = new System.Drawing.Size(176, 26);
-            this.txtDodge.TabIndex = 16;
-            // 
+            this.txtDodge.TabIndex = 17;
+            //
             // txtToggleAutomation
-            // 
+            //
             this.txtToggleAutomation.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtToggleAutomation.Location = new System.Drawing.Point(169, 305);
+            this.txtToggleAutomation.Location = new System.Drawing.Point(169, 335);
             this.txtToggleAutomation.Name = "txtToggleAutomation";
             this.txtToggleAutomation.Size = new System.Drawing.Size(176, 26);
-            this.txtToggleAutomation.TabIndex = 17;
+            this.txtToggleAutomation.TabIndex = 18;
             // 
             // btnSave
-            // 
+            //
             this.btnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(72, 345);
+            this.btnSave.Location = new System.Drawing.Point(72, 375);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(89, 30);
-            this.btnSave.TabIndex = 18;
+            this.btnSave.TabIndex = 19;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
+            //
             // bntCancel
-            // 
+            //
             this.bntCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bntCancel.Location = new System.Drawing.Point(169, 345);
+            this.bntCancel.Location = new System.Drawing.Point(169, 375);
             this.bntCancel.Name = "bntCancel";
             this.bntCancel.Size = new System.Drawing.Size(89, 30);
-            this.bntCancel.TabIndex = 19;
+            this.bntCancel.TabIndex = 20;
             this.bntCancel.Text = "Cancel";
             this.bntCancel.UseVisualStyleBackColor = true;
             this.bntCancel.Click += new System.EventHandler(this.bntCancel_Click);
@@ -246,16 +266,17 @@
             this.label1.Text = "Instructions: Click on the textbox and then\r\ntype key or mouse click";
             // 
             // KeyConfigForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(368, 397);
+            this.ClientSize = new System.Drawing.Size(368, 427);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.bntCancel);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.txtToggleAutomation);
             this.Controls.Add(this.txtDodge);
             this.Controls.Add(this.txtPotion);
+            this.Controls.Add(this.txtMove);
             this.Controls.Add(this.txtSecondaryAttack);
             this.Controls.Add(this.txtPrimaryAttack);
             this.Controls.Add(this.txtSkill4);
@@ -265,6 +286,7 @@
             this.Controls.Add(this.lblToggleAutomation);
             this.Controls.Add(this.lblDodge);
             this.Controls.Add(this.lblPotion);
+            this.Controls.Add(this.lblMove);
             this.Controls.Add(this.lblSecondaryAttack);
             this.Controls.Add(this.lblPrimaryAttack);
             this.Controls.Add(this.lblSkill4);
@@ -291,6 +313,7 @@
         private System.Windows.Forms.Label lblSkill4;
         private System.Windows.Forms.Label lblPrimaryAttack;
         private System.Windows.Forms.Label lblSecondaryAttack;
+        private System.Windows.Forms.Label lblMove;
         private System.Windows.Forms.Label lblPotion;
         private System.Windows.Forms.Label lblDodge;
         private System.Windows.Forms.Label lblToggleAutomation;
@@ -300,6 +323,7 @@
         private System.Windows.Forms.TextBox txtSkill4;
         private System.Windows.Forms.TextBox txtPrimaryAttack;
         private System.Windows.Forms.TextBox txtSecondaryAttack;
+        private System.Windows.Forms.TextBox txtMove;
         private System.Windows.Forms.TextBox txtPotion;
         private System.Windows.Forms.TextBox txtDodge;
         private System.Windows.Forms.TextBox txtToggleAutomation;

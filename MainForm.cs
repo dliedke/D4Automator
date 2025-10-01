@@ -163,6 +163,7 @@ namespace D4Automator
             nudSkill4.ValueChanged += nudSkill4_ValueChanged;
             nudPrimaryAttack.ValueChanged += nudRightClick_ValueChanged;
             nudSecondaryAttack.ValueChanged += nudLeftClick_ValueChanged;
+            nudMove.ValueChanged += nudMove_ValueChanged;
             nudPotion.ValueChanged += nudPotion_ValueChanged;
             nudDodge.ValueChanged += nudDodge_ValueChanged;
 
@@ -173,6 +174,7 @@ namespace D4Automator
             nudSkill4.KeyDown += NumericUpDown_KeyDown;
             nudPrimaryAttack.KeyDown += NumericUpDown_KeyDown;
             nudSecondaryAttack.KeyDown += NumericUpDown_KeyDown;
+            nudMove.KeyDown += NumericUpDown_KeyDown;
             nudPotion.KeyDown += NumericUpDown_KeyDown;
             nudDodge.KeyDown += NumericUpDown_KeyDown;
         }
@@ -261,6 +263,7 @@ namespace D4Automator
                 Skill4Delay = 3000,
                 PrimaryAttackDelay = 400,
                 SecondaryAttackDelay = 400,
+                MoveDelay = 400,
                 PotionDelay = 2000,
                 DodgeDelay = 0
             };
@@ -325,6 +328,7 @@ namespace D4Automator
             nudSkill4.Value = settings.Skill4Delay;
             nudPrimaryAttack.Value = settings.PrimaryAttackDelay;
             nudSecondaryAttack.Value = settings.SecondaryAttackDelay;
+            nudMove.Value = settings.MoveDelay;
             nudPotion.Value = settings.PotionDelay;
             nudDodge.Value = settings.DodgeDelay;
         }
@@ -337,6 +341,7 @@ namespace D4Automator
             lblSkill4.Text = $"Skill 4 ({GetDisplayTextForKey(settings.Skill4Action)}) Delay (ms):";
             lblPrimaryAttack.Text = $"Primary Attack ({GetDisplayTextForKey(settings.PrimaryAttackAction)}) Delay (ms):";
             lblSecondaryAttack.Text = $"Secondary Attack ({GetDisplayTextForKey(settings.SecondaryAttackAction)}) Delay (ms):";
+            lblMove.Text = $"Move ({GetDisplayTextForKey(settings.MoveAction)}) Delay (ms):";
             lblPotion.Text = $"Potion ({GetDisplayTextForKey(settings.PotionAction)}) Delay (ms):";
             lblDodge.Text = $"Dodge ({GetDisplayTextForKey(settings.DodgeAction)}) Delay (ms):";
 
@@ -584,11 +589,23 @@ namespace D4Automator
                 RunActionLoop(settings.Skill2Delay, keyMappings["Skill2"], cancellationToken),
                 RunActionLoop(settings.Skill3Delay, keyMappings["Skill3"], cancellationToken),
                 RunActionLoop(settings.Skill4Delay, keyMappings["Skill4"], cancellationToken),
-                RunActionLoop(settings.PrimaryAttackDelay, keyMappings["PrimaryAttack"], cancellationToken),
                 RunActionLoop(settings.SecondaryAttackDelay, keyMappings["SecondaryAttack"], cancellationToken),
                 RunActionLoop(settings.PotionDelay, keyMappings["Potion"], cancellationToken),
                 RunActionLoop(settings.DodgeDelay, keyMappings["Dodge"], cancellationToken)
             };
+
+            // Handle Primary Attack and Move together
+            if (settings.PrimaryAttackAction == settings.MoveAction)
+            {
+                // If both are the same, only run Primary Attack
+                tasks.Add(RunActionLoop(settings.PrimaryAttackDelay, keyMappings["PrimaryAttack"], cancellationToken));
+            }
+            else
+            {
+                // If different, run both
+                tasks.Add(RunActionLoop(settings.PrimaryAttackDelay, keyMappings["PrimaryAttack"], cancellationToken));
+                tasks.Add(RunActionLoop(settings.MoveDelay, keyMappings["Move"], cancellationToken));
+            }
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -823,6 +840,13 @@ namespace D4Automator
             SaveSettings();
         }
 
+        private void nudMove_ValueChanged(object sender, EventArgs e)
+        {
+            settings.MoveDelay = (int)nudMove.Value;
+            MarkAsChanged();
+            SaveSettings();
+        }
+
         private void nudDodge_ValueChanged(object sender, EventArgs e)
         {
             settings.DodgeDelay = (int)nudDodge.Value;
@@ -873,6 +897,7 @@ namespace D4Automator
                 {"Skill4", () => SimulateAction(settings.Skill4Action, settings.Skill4Delay == 1)},
                 {"PrimaryAttack", () => SimulateAction(settings.PrimaryAttackAction, settings.PrimaryAttackDelay == 1)},
                 {"SecondaryAttack", () => SimulateAction(settings.SecondaryAttackAction, settings.SecondaryAttackDelay == 1)},
+                {"Move", () => SimulateAction(settings.MoveAction, settings.MoveDelay == 1)},
                 {"Potion", () => SimulateAction(settings.PotionAction, settings.PotionDelay == 1)},
                 {"Dodge", () => SimulateAction(settings.DodgeAction, settings.DodgeDelay == 1)}
             };
@@ -921,6 +946,7 @@ namespace D4Automator
             json.AppendLine($"  \"Skill4Delay\": {settings.Skill4Delay},");
             json.AppendLine($"  \"PrimaryAttackDelay\": {settings.PrimaryAttackDelay},");
             json.AppendLine($"  \"SecondaryAttackDelay\": {settings.SecondaryAttackDelay},");
+            json.AppendLine($"  \"MoveDelay\": {settings.MoveDelay},");
             json.AppendLine($"  \"PotionDelay\": {settings.PotionDelay},");
             json.AppendLine($"  \"DodgeDelay\": {settings.DodgeDelay},");
             json.AppendLine($"  \"Skill1Action\": \"{EscapeJsonString(settings.Skill1Action)}\",");
@@ -929,6 +955,7 @@ namespace D4Automator
             json.AppendLine($"  \"Skill4Action\": \"{EscapeJsonString(settings.Skill4Action)}\",");
             json.AppendLine($"  \"PrimaryAttackAction\": \"{EscapeJsonString(settings.PrimaryAttackAction)}\",");
             json.AppendLine($"  \"SecondaryAttackAction\": \"{EscapeJsonString(settings.SecondaryAttackAction)}\",");
+            json.AppendLine($"  \"MoveAction\": \"{EscapeJsonString(settings.MoveAction)}\",");
             json.AppendLine($"  \"PotionAction\": \"{EscapeJsonString(settings.PotionAction)}\",");
             json.AppendLine($"  \"DodgeAction\": \"{EscapeJsonString(settings.DodgeAction)}\",");
             json.AppendLine($"  \"ToggleAutomationAction\": \"{EscapeJsonString(settings.ToggleAutomationAction)}\",");
@@ -980,6 +1007,9 @@ namespace D4Automator
                             case "SecondaryAttackDelay":
                                 if (int.TryParse(value, out int secondaryDelay)) settings.SecondaryAttackDelay = secondaryDelay;
                                 break;
+                            case "MoveDelay":
+                                if (int.TryParse(value, out int moveDelay)) settings.MoveDelay = moveDelay;
+                                break;
                             case "PotionDelay":
                                 if (int.TryParse(value, out int potionDelay)) settings.PotionDelay = potionDelay;
                                 break;
@@ -1003,6 +1033,9 @@ namespace D4Automator
                                 break;
                             case "SecondaryAttackAction":
                                 settings.SecondaryAttackAction = value;
+                                break;
+                            case "MoveAction":
+                                settings.MoveAction = value;
                                 break;
                             case "PotionAction":
                                 settings.PotionAction = value;
@@ -1134,6 +1167,7 @@ namespace D4Automator
                 (int)nudSkill4.Value != settings.Skill4Delay ||
                 (int)nudPrimaryAttack.Value != settings.PrimaryAttackDelay ||
                 (int)nudSecondaryAttack.Value != settings.SecondaryAttackDelay ||
+                (int)nudMove.Value != settings.MoveDelay ||
                 (int)nudPotion.Value != settings.PotionDelay ||
                 (int)nudDodge.Value != settings.DodgeDelay)
             {
@@ -1381,6 +1415,7 @@ namespace D4Automator
         public int Skill4Delay { get; set; }
         public int PrimaryAttackDelay { get; set; }
         public int SecondaryAttackDelay { get; set; }
+        public int MoveDelay { get; set; }
         public int PotionDelay { get; set; }
         public int DodgeDelay { get; set; }
 
@@ -1390,6 +1425,7 @@ namespace D4Automator
         public string Skill4Action { get; set; }
         public string PrimaryAttackAction { get; set; }
         public string SecondaryAttackAction { get; set; }
+        public string MoveAction { get; set; }
         public string PotionAction { get; set; }
         public string DodgeAction { get; set; }
         public string ToggleAutomationAction { get; set; }
@@ -1404,6 +1440,7 @@ namespace D4Automator
             Skill4Action = "D4";
             PrimaryAttackAction = "RightClick";
             SecondaryAttackAction = "LeftClick";
+            MoveAction = "RightClick";
             PotionAction = "Q";
             DodgeAction = "Space";
             ToggleAutomationAction = "F5";
@@ -1415,6 +1452,7 @@ namespace D4Automator
             Skill4Delay = 1000;
             PrimaryAttackDelay = 100;
             SecondaryAttackDelay = 100;
+            MoveDelay = 100;
             PotionDelay = 5000;
             DodgeDelay = 1000;
         }
