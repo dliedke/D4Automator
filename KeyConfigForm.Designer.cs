@@ -39,6 +39,7 @@
             this.lblPotion = new System.Windows.Forms.Label();
             this.lblDodge = new System.Windows.Forms.Label();
             this.lblToggleAutomation = new System.Windows.Forms.Label();
+            this.lblToggleMouseMove = new System.Windows.Forms.Label();
             this.txtSkill1 = new System.Windows.Forms.TextBox();
             this.txtSkill2 = new System.Windows.Forms.TextBox();
             this.txtSkill3 = new System.Windows.Forms.TextBox();
@@ -49,6 +50,7 @@
             this.txtPotion = new System.Windows.Forms.TextBox();
             this.txtDodge = new System.Windows.Forms.TextBox();
             this.txtToggleAutomation = new System.Windows.Forms.TextBox();
+            this.txtToggleMouseMove = new System.Windows.Forms.TextBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.bntCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -153,7 +155,17 @@
             this.lblToggleAutomation.Size = new System.Drawing.Size(147, 20);
             this.lblToggleAutomation.TabIndex = 9;
             this.lblToggleAutomation.Text = "Toggle Automation:";
-            // 
+            //
+            // lblToggleMouseMove
+            //
+            this.lblToggleMouseMove.AutoSize = true;
+            this.lblToggleMouseMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblToggleMouseMove.Location = new System.Drawing.Point(14, 368);
+            this.lblToggleMouseMove.Name = "lblToggleMouseMove";
+            this.lblToggleMouseMove.Size = new System.Drawing.Size(155, 20);
+            this.lblToggleMouseMove.TabIndex = 10;
+            this.lblToggleMouseMove.Text = "Toggle Mouse Move:";
+            //
             // txtSkill1
             // 
             this.txtSkill1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -233,14 +245,22 @@
             this.txtToggleAutomation.Name = "txtToggleAutomation";
             this.txtToggleAutomation.Size = new System.Drawing.Size(176, 26);
             this.txtToggleAutomation.TabIndex = 18;
-            // 
+            //
+            // txtToggleMouseMove
+            //
+            this.txtToggleMouseMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtToggleMouseMove.Location = new System.Drawing.Point(169, 365);
+            this.txtToggleMouseMove.Name = "txtToggleMouseMove";
+            this.txtToggleMouseMove.Size = new System.Drawing.Size(176, 26);
+            this.txtToggleMouseMove.TabIndex = 19;
+            //
             // btnSave
             //
             this.btnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(72, 375);
+            this.btnSave.Location = new System.Drawing.Point(72, 405);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(89, 30);
-            this.btnSave.TabIndex = 19;
+            this.btnSave.TabIndex = 20;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -248,31 +268,32 @@
             // bntCancel
             //
             this.bntCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bntCancel.Location = new System.Drawing.Point(169, 375);
+            this.bntCancel.Location = new System.Drawing.Point(169, 405);
             this.bntCancel.Name = "bntCancel";
             this.bntCancel.Size = new System.Drawing.Size(89, 30);
-            this.bntCancel.TabIndex = 20;
+            this.bntCancel.TabIndex = 21;
             this.bntCancel.Text = "Cancel";
             this.bntCancel.UseVisualStyleBackColor = true;
             this.bntCancel.Click += new System.EventHandler(this.bntCancel_Click);
-            // 
+            //
             // label1
-            // 
+            //
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(333, 41);
-            this.label1.TabIndex = 20;
+            this.label1.TabIndex = 21;
             this.label1.Text = "Instructions: Click on the textbox and then\r\ntype key or mouse click";
-            // 
+            //
             // KeyConfigForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(368, 427);
+            this.ClientSize = new System.Drawing.Size(368, 457);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.bntCancel);
             this.Controls.Add(this.btnSave);
+            this.Controls.Add(this.txtToggleMouseMove);
             this.Controls.Add(this.txtToggleAutomation);
             this.Controls.Add(this.txtDodge);
             this.Controls.Add(this.txtPotion);
@@ -283,6 +304,7 @@
             this.Controls.Add(this.txtSkill3);
             this.Controls.Add(this.txtSkill2);
             this.Controls.Add(this.txtSkill1);
+            this.Controls.Add(this.lblToggleMouseMove);
             this.Controls.Add(this.lblToggleAutomation);
             this.Controls.Add(this.lblDodge);
             this.Controls.Add(this.lblPotion);
@@ -317,6 +339,7 @@
         private System.Windows.Forms.Label lblPotion;
         private System.Windows.Forms.Label lblDodge;
         private System.Windows.Forms.Label lblToggleAutomation;
+        private System.Windows.Forms.Label lblToggleMouseMove;
         private System.Windows.Forms.TextBox txtSkill1;
         private System.Windows.Forms.TextBox txtSkill2;
         private System.Windows.Forms.TextBox txtSkill3;
@@ -327,6 +350,7 @@
         private System.Windows.Forms.TextBox txtPotion;
         private System.Windows.Forms.TextBox txtDodge;
         private System.Windows.Forms.TextBox txtToggleAutomation;
+        private System.Windows.Forms.TextBox txtToggleMouseMove;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button bntCancel;
         private System.Windows.Forms.Label label1;

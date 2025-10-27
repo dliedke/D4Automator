@@ -43,6 +43,7 @@ namespace D4Automator
         private const int XBUTTON1 = 0x0001;
         private const int XBUTTON2 = 0x0002;
         private const int HOTKEY_ID = 9000;
+        private const int MOUSEMOVE_HOTKEY_ID = 9001;
 
         private bool isRunning = false;
         private Settings settings;
@@ -56,7 +57,6 @@ namespace D4Automator
         private const float DEAD_ZONE = 0.1f; // Adjust as needed
         private bool wasAutomationRunning = false;
 
-        private bool isMouseMoveEnabled = false;
         private bool isMoving = false;
         private System.Windows.Forms.Timer moveTimer;
         private const int PAUSE_DURATION = 4000; // Pause between moves
@@ -345,7 +345,7 @@ namespace D4Automator
             lblPotion.Text = $"Potion ({GetDisplayTextForKey(settings.PotionAction)}) Delay (ms):";
             lblDodge.Text = $"Dodge ({GetDisplayTextForKey(settings.DodgeAction)}) Delay (ms):";
 
-            lblInstructions.Text = $"Press {GetDisplayTextForKey(settings.ToggleAutomationAction)} to start/stop automation.\r\nSet delay to 0 to disable an action.\r\nSet delay to 1 to keep button/key pressed.";
+            lblInstructions.Text = $"Press {GetDisplayTextForKey(settings.ToggleAutomationAction)} to start/stop automation.\r\nPress {GetDisplayTextForKey(settings.ToggleMouseMoveAction)} for automation + mouse move (Infernal Hordes).\r\n\r\nSet delay to 0 to disable an action.\r\nSet delay to 1 to keep button/key pressed.";
         }
 
         private string GetDisplayTextForKey(string keyString)
@@ -388,15 +388,15 @@ namespace D4Automator
         {
             if (m.Msg == 0x0312) // WM_HOTKEY
             {
-                // Original automation hotkey
-                if (m.WParam.ToInt32() == HOTKEY_ID) 
+                // Automation toggle hotkey
+                if (m.WParam.ToInt32() == HOTKEY_ID)
                 {
                     ToggleAutomation();
-
-                    if (isMouseMoveEnabled)
-                    {
-                        ToggleMovement();
-                    }
+                }
+                // Mouse move + automation toggle hotkey
+                else if (m.WParam.ToInt32() == MOUSEMOVE_HOTKEY_ID)
+                {
+                    ToggleAutomationWithMouseMove();
                 }
             }
 
@@ -404,39 +404,40 @@ namespace D4Automator
         }
 
 
-        private void chkMouseMove_CheckedChanged(object sender, EventArgs e)
+        private void ToggleAutomationWithMouseMove()
         {
-            isMouseMoveEnabled = chkMouseMove.Checked;
-
-            if (chkMouseMove.Checked)
+            if (!isRunning)
             {
+                // Start automation
+                StartAutomation();
+                wasAutomationRunning = false;
+
+                // Start mouse movement
                 InitializeMouseMovement();
-            }
-            else
-            {
-                moveTimer.Stop();
-            }
-        }
-
-        private void InitializeMouseMovement()
-        {
-            moveTimer = new System.Windows.Forms.Timer();
-            moveTimer.Interval = 50;
-            moveTimer.Tick += MoveTimer_Tick;
-        }
-
-        private void ToggleMovement()
-        {
-            isMoving = !isMoving;
-            if (isMoving)
-            {
+                isMoving = true;
                 currentDirection = 0; // Start with up
                 StartNextMove();
                 moveTimer.Start();
             }
             else
             {
-                moveTimer.Stop();
+                // Stop automation
+                StopAutomation();
+                wasAutomationRunning = false;
+
+                // Stop mouse movement
+                isMoving = false;
+                moveTimer?.Stop();
+            }
+        }
+
+        private void InitializeMouseMovement()
+        {
+            if (moveTimer == null)
+            {
+                moveTimer = new System.Windows.Forms.Timer();
+                moveTimer.Interval = 50;
+                moveTimer.Tick += MoveTimer_Tick;
             }
         }
 
@@ -764,9 +765,16 @@ namespace D4Automator
         private void RegisterGlobalHotkey()
         {
             UnregisterHotKey(this.Handle, HOTKEY_ID);
-            if (Enum.TryParse(settings.ToggleAutomationAction, out Keys key))
+            UnregisterHotKey(this.Handle, MOUSEMOVE_HOTKEY_ID);
+
+            if (Enum.TryParse(settings.ToggleAutomationAction, out Keys automationKey))
             {
-                RegisterHotKey(this.Handle, HOTKEY_ID, 0, (uint)key);
+                RegisterHotKey(this.Handle, HOTKEY_ID, 0, (uint)automationKey);
+            }
+
+            if (Enum.TryParse(settings.ToggleMouseMoveAction, out Keys mouseMoveKey))
+            {
+                RegisterHotKey(this.Handle, MOUSEMOVE_HOTKEY_ID, 0, (uint)mouseMoveKey);
             }
         }
 
@@ -774,6 +782,7 @@ namespace D4Automator
         private void UnregisterGlobalHotkey()
         {
             UnregisterHotKey(this.Handle, HOTKEY_ID);
+            UnregisterHotKey(this.Handle, MOUSEMOVE_HOTKEY_ID);
         }
 
         private void ApplyDarkMode()
@@ -864,7 +873,6 @@ namespace D4Automator
 
             SaveSettings();
             UnregisterGlobalHotkey();
-            UnregisterHotKey(this.Handle, 9001); // Unregister F4 hotkey
             ReleaseHeldInputs(); // Release any held inputs before closing
 
             controllerCheckTimer?.Stop();
@@ -875,6 +883,9 @@ namespace D4Automator
 
         private void btnKeyConfig_Click(object sender, EventArgs e)
         {
+            // Unregister hotkeys to prevent them from triggering during configuration
+            UnregisterGlobalHotkey();
+
             using (var keyConfigForm = new KeyConfigForm(settings))
             {
                 if (keyConfigForm.ShowDialog() == DialogResult.OK)
@@ -885,6 +896,9 @@ namespace D4Automator
                     UpdateLabels();
                 }
             }
+
+            // Re-register hotkeys after configuration dialog closes
+            RegisterGlobalHotkey();
         }
 
         private void UpdateKeyMappings()
@@ -959,6 +973,7 @@ namespace D4Automator
             json.AppendLine($"  \"PotionAction\": \"{EscapeJsonString(settings.PotionAction)}\",");
             json.AppendLine($"  \"DodgeAction\": \"{EscapeJsonString(settings.DodgeAction)}\",");
             json.AppendLine($"  \"ToggleAutomationAction\": \"{EscapeJsonString(settings.ToggleAutomationAction)}\",");
+            json.AppendLine($"  \"ToggleMouseMoveAction\": \"{EscapeJsonString(settings.ToggleMouseMoveAction)}\",");
             json.AppendLine($"  \"LastLoadedConfigFile\": \"{EscapeJsonString(settings.LastLoadedConfigFile)}\"");
             json.AppendLine("}");
             return json.ToString();
@@ -1046,6 +1061,9 @@ namespace D4Automator
                             case "ToggleAutomationAction":
                                 settings.ToggleAutomationAction = value;
                                 break;
+                            case "ToggleMouseMoveAction":
+                                settings.ToggleMouseMoveAction = value;
+                                break;
                             case "LastLoadedConfigFile":
                                 settings.LastLoadedConfigFile = value;
                                 break;
@@ -1053,7 +1071,7 @@ namespace D4Automator
                     }
                 }
             }
-            
+
             return settings;
         }
 
@@ -1429,6 +1447,7 @@ namespace D4Automator
         public string PotionAction { get; set; }
         public string DodgeAction { get; set; }
         public string ToggleAutomationAction { get; set; }
+        public string ToggleMouseMoveAction { get; set; }
         public string LastLoadedConfigFile { get; set; }
 
         public Settings()
@@ -1444,6 +1463,7 @@ namespace D4Automator
             PotionAction = "Q";
             DodgeAction = "Space";
             ToggleAutomationAction = "F5";
+            ToggleMouseMoveAction = "F6";
 
             // Set default delays
             Skill1Delay = 1000;

@@ -48,7 +48,8 @@ namespace D4Automator
                 {"MoveAction", txtMove},
                 {"PotionAction", txtPotion},
                 {"DodgeAction", txtDodge},
-                {"ToggleAutomationAction", txtToggleAutomation}
+                {"ToggleAutomationAction", txtToggleAutomation},
+                {"ToggleMouseMoveAction", txtToggleMouseMove}
             };
 
             foreach (var textBox in actionControls.Values)
