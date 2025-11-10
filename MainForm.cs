@@ -406,7 +406,25 @@ namespace D4Automator
 
         private void ToggleAutomationWithMouseMove()
         {
-            if (!isRunning)
+            // If regular automation is running (without mouse movement), stop it first
+            if (isRunning && !isMoving)
+            {
+                // Stop regular automation
+                StopAutomation();
+                wasAutomationRunning = false;
+
+                // Start hordes automation (automation + mouse movement)
+                StartAutomation();
+                wasAutomationRunning = false;
+
+                // Start mouse movement
+                InitializeMouseMovement();
+                isMoving = true;
+                currentDirection = 0; // Start with up
+                StartNextMove();
+                moveTimer.Start();
+            }
+            else if (!isRunning)
             {
                 // Start automation
                 StartAutomation();
@@ -541,7 +559,20 @@ namespace D4Automator
 
         private void ToggleAutomation()
         {
-            if (!isRunning)
+            // If hordes automation is running (automation + mouse movement), stop it first
+            if (isRunning && isMoving)
+            {
+                // Stop hordes automation
+                StopAutomation();
+                isMoving = false;
+                moveTimer?.Stop();
+                wasAutomationRunning = false;
+
+                // Start regular automation
+                StartAutomation();
+                wasAutomationRunning = false;
+            }
+            else if (!isRunning)
             {
                 StartAutomation();
                 wasAutomationRunning = false; // Reset this flag when manually starting
