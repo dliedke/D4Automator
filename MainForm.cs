@@ -59,15 +59,21 @@ namespace D4Automator
 
         private bool isMoving = false;
         private System.Windows.Forms.Timer moveTimer;
-        private const int PAUSE_DURATION = 4000; // Pause between moves
-        private const int BORDER_PADDING = 50; // Distance from screen borders
-        private const int MOVE_STEPS = 50; // Steps for smooth movement
-        private Point targetPosition;
-        private Point startPosition;
-        private int currentStep = 0;
-        private bool isMovingToTarget = false;
-        private int currentDirection = 0; // 0=up, 1=down, 2=up-left, 3=down-right
-        
+
+        // Hordes elliptical movement configuration - adjust these values to troubleshoot
+        private const int ELLIPSE_RADIUS_X = 178; // Horizontal radius in pixels (16:9 aspect ratio)
+        private const int ELLIPSE_RADIUS_Y = 100; // Vertical radius in pixels
+        private const double CIRCLE_SPEED = 3.5; // Degrees to move per tick (smaller = slower movement)
+        private const int CIRCLE_TIMER_INTERVAL = 100; // Milliseconds between movements (higher = slower)
+
+        private double currentAngle = 0; // Current angle in the circle (0-360 degrees)
+        private Point circleCenter; // Center point of the circle
+        private int circleDirection = 1; // 1 for clockwise, -1 for counter-clockwise
+        private double degreesInCurrentDirection = 0; // Track degrees traveled since last reversal
+        private const double DEGREES_BEFORE_REVERSAL = 540; // 1.5 full circles (360 * 1.5)
+
+        private OverlayForm overlayForm; // Overlay to show automation status
+
         private bool hasUnsavedChanges = false;
         private string currentFileName = string.Empty;
         private string recentFilesPath;
@@ -83,7 +89,8 @@ namespace D4Automator
             SetFormTitle();
             UpdateLabels();
             InitializeControllerDetection();
-            
+            InitializeOverlay();
+
             // Update recent files menu after form is loaded
             this.Load += MainForm_Load;
         }
@@ -406,46 +413,42 @@ namespace D4Automator
 
         private void ToggleAutomationWithMouseMove()
         {
-            // If regular automation is running (without mouse movement), stop it first
+            // If regular automation is running, switch to hordes automation
             if (isRunning && !isMoving)
             {
-                // Stop regular automation
-                StopAutomation();
-                wasAutomationRunning = false;
-
-                // Start hordes automation (automation + mouse movement)
-                StartAutomation();
-                wasAutomationRunning = false;
-
-                // Start mouse movement
+                // Start mouse movement (automation already running)
                 InitializeMouseMovement();
                 isMoving = true;
-                currentDirection = 0; // Start with up
-                StartNextMove();
+                circleCenter = System.Windows.Forms.Cursor.Position;
+                currentAngle = 0;
+                circleDirection = 1;
+                degreesInCurrentDirection = 0;
                 moveTimer.Start();
+                UpdateOverlay();
             }
-            else if (!isRunning)
+            // If hordes automation is already running, stop everything
+            else if (isRunning && isMoving)
             {
-                // Start automation
-                StartAutomation();
-                wasAutomationRunning = false;
-
-                // Start mouse movement
-                InitializeMouseMovement();
-                isMoving = true;
-                currentDirection = 0; // Start with up
-                StartNextMove();
-                moveTimer.Start();
-            }
-            else
-            {
-                // Stop automation
                 StopAutomation();
                 wasAutomationRunning = false;
-
-                // Stop mouse movement
                 isMoving = false;
                 moveTimer?.Stop();
+                UpdateOverlay();
+            }
+            // If nothing is running, start hordes automation
+            else
+            {
+                StartAutomation();
+                wasAutomationRunning = false;
+
+                InitializeMouseMovement();
+                isMoving = true;
+                circleCenter = System.Windows.Forms.Cursor.Position;
+                currentAngle = 0;
+                circleDirection = 1;
+                degreesInCurrentDirection = 0;
+                moveTimer.Start();
+                UpdateOverlay();
             }
         }
 
@@ -454,68 +457,8 @@ namespace D4Automator
             if (moveTimer == null)
             {
                 moveTimer = new System.Windows.Forms.Timer();
-                moveTimer.Interval = 50;
+                moveTimer.Interval = CIRCLE_TIMER_INTERVAL;
                 moveTimer.Tick += MoveTimer_Tick;
-            }
-        }
-
-        private Point GetDirectionalPosition()
-        {
-            Rectangle screenBounds = Screen.PrimaryScreen.Bounds;
-            Point newPos;
-            
-            switch (currentDirection)
-            {
-                case 0: // Up - center width, top with padding
-                    newPos = new Point(
-                        screenBounds.Width / 2,
-                        screenBounds.Top + BORDER_PADDING
-                    );
-                    break;
-                case 1: // Down - center width, bottom with padding
-                    newPos = new Point(
-                        screenBounds.Width / 2,
-                        screenBounds.Bottom - BORDER_PADDING
-                    );
-                    break;
-                case 2: // Up-Left corner with padding
-                    newPos = new Point(
-                        screenBounds.Left + BORDER_PADDING,
-                        screenBounds.Top + BORDER_PADDING
-                    );
-                    break;
-                case 3: // Down-Right corner with padding
-                    newPos = new Point(
-                        screenBounds.Right - BORDER_PADDING,
-                        screenBounds.Bottom - BORDER_PADDING
-                    );
-                    break;
-                default:
-                    newPos = System.Windows.Forms.Cursor.Position;
-                    break;
-            }
-            
-            // Move to next direction for next cycle
-            currentDirection = (currentDirection + 1) % 4;
-            
-            return newPos;
-        }
-
-        private void StartNextMove()
-        {
-            startPosition = System.Windows.Forms.Cursor.Position;
-            targetPosition = GetDirectionalPosition();
-            currentStep = 0;
-            isMovingToTarget = true;
-        }
-
-        private async Task PauseBetweenMoves()
-        {
-            isMovingToTarget = false;
-            await Task.Delay(PAUSE_DURATION);
-            if (isMoving)
-            {
-                StartNextMove();
             }
         }
 
@@ -523,64 +466,61 @@ namespace D4Automator
         {
             if (!isMoving) return;
 
-            if (!isMovingToTarget)
-            {
-                return; // We're in a pause
-            }
+            // Convert angle to radians for calculation
+            double angleInRadians = currentAngle * (Math.PI / 180.0);
 
-            // Calculate progress (0.0 to 1.0)
-            float progress = (float)currentStep / MOVE_STEPS;
+            // Calculate the new position on the ellipse (16:9 aspect ratio)
+            int newX = circleCenter.X + (int)(ELLIPSE_RADIUS_X * Math.Cos(angleInRadians));
+            int newY = circleCenter.Y + (int)(ELLIPSE_RADIUS_Y * Math.Sin(angleInRadians));
 
-            // Use smooth easing for directional movement
-            progress = EaseInOutQuad(progress);
-
-            // Calculate new position
-            int newX = (int)(startPosition.X + (targetPosition.X - startPosition.X) * progress);
-            int newY = (int)(startPosition.Y + (targetPosition.Y - startPosition.Y) * progress);
-
-            // Move cursor
+            // Move cursor to the new position
             System.Windows.Forms.Cursor.Position = new Point(newX, newY);
 
-            // Increment step
-            currentStep++;
+            // Increment the angle for the next tick (multiply by direction for reversal)
+            currentAngle += CIRCLE_SPEED * circleDirection;
+            degreesInCurrentDirection += CIRCLE_SPEED;
 
-            // If we've reached the target, start a pause
-            if (currentStep >= MOVE_STEPS)
+            // Normalize angle to stay within 0-360 range
+            if (currentAngle >= 360)
             {
-                _ = PauseBetweenMoves();
+                currentAngle -= 360;
             }
-        }
+            else if (currentAngle < 0)
+            {
+                currentAngle += 360;
+            }
 
-        // Easing function to make movement more natural
-        private float EaseInOutQuad(float t)
-        {
-            return t < 0.5f ? 2 * t * t : 1 - (float)Math.Pow(-2 * t + 2, 2) / 2;
+            // Reverse direction after 1.5 circles (540 degrees)
+            if (degreesInCurrentDirection >= DEGREES_BEFORE_REVERSAL)
+            {
+                circleDirection *= -1;
+                degreesInCurrentDirection = 0;
+            }
         }
 
         private void ToggleAutomation()
         {
-            // If hordes automation is running (automation + mouse movement), stop it first
+            // If hordes automation is running, switch to regular automation
             if (isRunning && isMoving)
             {
-                // Stop hordes automation
-                StopAutomation();
+                // Stop mouse movement but keep automation running
                 isMoving = false;
                 moveTimer?.Stop();
-                wasAutomationRunning = false;
-
-                // Start regular automation
-                StartAutomation();
-                wasAutomationRunning = false;
+                UpdateOverlay();
             }
-            else if (!isRunning)
-            {
-                StartAutomation();
-                wasAutomationRunning = false; // Reset this flag when manually starting
-            }
-            else
+            // If regular automation is already running, stop it
+            else if (isRunning && !isMoving)
             {
                 StopAutomation();
-                wasAutomationRunning = false; // Ensure this is false when manually stopping
+                wasAutomationRunning = false;
+                UpdateOverlay();
+            }
+            // If nothing is running, start regular automation
+            else
+            {
+                StartAutomation();
+                wasAutomationRunning = false;
+                UpdateOverlay();
             }
         }
 
@@ -910,6 +850,13 @@ namespace D4Automator
             controllerCheckTimer?.Dispose();
             moveTimer?.Dispose();
             controller = null;
+
+            // Close and dispose overlay
+            if (overlayForm != null && !overlayForm.IsDisposed)
+            {
+                overlayForm.Close();
+                overlayForm.Dispose();
+            }
         }
 
         private void btnKeyConfig_Click(object sender, EventArgs e)
@@ -1453,7 +1400,38 @@ namespace D4Automator
             }
         }
 
-       
+        private void InitializeOverlay()
+        {
+            overlayForm = new OverlayForm();
+            // Don't show initially - UpdateOverlay will show it when automation starts
+            UpdateOverlay();
+        }
+
+        private void UpdateOverlay()
+        {
+            if (overlayForm == null || overlayForm.IsDisposed)
+            {
+                overlayForm = new OverlayForm();
+            }
+
+            if (isRunning && isMoving)
+            {
+                overlayForm.SetStatus("HORDES AUTOMATION");
+                overlayForm.Show();
+            }
+            else if (isRunning && !isMoving)
+            {
+                overlayForm.SetStatus("AUTOMATION ON");
+                overlayForm.Show();
+            }
+            else
+            {
+                // Hide overlay when stopped
+                overlayForm.Hide();
+            }
+        }
+
+
     }
 
     public class Settings
@@ -1506,6 +1484,93 @@ namespace D4Automator
             MoveDelay = 100;
             PotionDelay = 5000;
             DodgeDelay = 1000;
+        }
+    }
+
+    public class OverlayForm : Form
+    {
+        private Label statusLabel;
+        private bool allowClose = false;
+
+        public OverlayForm()
+        {
+            // Make the form transparent and always on top
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.TopMost = true;
+            this.ShowInTaskbar = false;
+            this.BackColor = Color.Black;
+            this.TransparencyKey = Color.Black;
+            this.StartPosition = FormStartPosition.Manual;
+
+            // Position at top-left of screen with some padding
+            this.Location = new Point(20, 20);
+            this.Size = new Size(250, 60);
+
+            // Create the status label
+            statusLabel = new Label();
+            statusLabel.AutoSize = false;
+            statusLabel.Dock = DockStyle.Fill;
+            statusLabel.TextAlign = ContentAlignment.MiddleLeft;
+            statusLabel.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            statusLabel.ForeColor = Color.Lime;
+            statusLabel.BackColor = Color.FromArgb(180, 0, 0, 0); // Semi-transparent black
+            statusLabel.Padding = new Padding(10);
+            statusLabel.Text = "STOPPED";
+
+            this.Controls.Add(statusLabel);
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            // Make it so clicking through the overlay is possible
+            // This needs to be done after the form is shown
+            int initialStyle = GetWindowLong(this.Handle, -20);
+            SetWindowLong(this.Handle, -20, initialStyle | 0x80000 | 0x20);
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        public void SetStatus(string status)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => SetStatus(status)));
+                return;
+            }
+
+            statusLabel.Text = status;
+
+            // Change color based on status
+            switch (status)
+            {
+                case "HORDES AUTOMATION":
+                    statusLabel.ForeColor = Color.Orange;
+                    break;
+                case "AUTOMATION ON":
+                    statusLabel.ForeColor = Color.Cyan;
+                    break;
+            }
+        }
+
+        public new void Close()
+        {
+            allowClose = true;
+            base.Close();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // Prevent the overlay from closing when the user tries to close it
+            if (!allowClose && e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+            }
+            base.OnFormClosing(e);
         }
     }
 }
