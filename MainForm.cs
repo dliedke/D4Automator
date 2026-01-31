@@ -61,10 +61,10 @@ namespace D4Automator
         private System.Windows.Forms.Timer moveTimer;
 
         // Hordes elliptical movement configuration - adjust these values to troubleshoot
-        private const int ELLIPSE_RADIUS_X = 178; // Horizontal radius in pixels (16:9 aspect ratio)
-        private const int ELLIPSE_RADIUS_Y = 100; // Vertical radius in pixels
-        private const double CIRCLE_SPEED = 3.5; // Degrees to move per tick (smaller = slower movement)
-        private const int CIRCLE_TIMER_INTERVAL = 100; // Milliseconds between movements (higher = slower)
+        private int ELLIPSE_RADIUS_X => (int)(settings.HordesCircleSize * 1.78); // Horizontal radius in pixels (16:9 aspect ratio)
+        private int ELLIPSE_RADIUS_Y => settings.HordesCircleSize; // Vertical radius in pixels
+        private double CIRCLE_SPEED => settings.HordesCircleSpeed; // Degrees to move per tick (smaller = slower movement)
+        private int CIRCLE_TIMER_INTERVAL => settings.HordesTimerInterval; // Milliseconds between movements (higher = slower)
 
         private double currentAngle = 0; // Current angle in the circle (0-360 degrees)
         private Point circleCenter; // Center point of the circle
@@ -879,6 +879,18 @@ namespace D4Automator
             RegisterGlobalHotkey();
         }
 
+        private void btnHordesConfig_Click(object sender, EventArgs e)
+        {
+            using (var hordesConfigForm = new HordesConfigForm(settings, () =>
+            {
+                MarkAsChanged();
+                SaveSettings();
+            }))
+            {
+                hordesConfigForm.ShowDialog();
+            }
+        }
+
         private void UpdateKeyMappings()
         {
             keyMappings = new Dictionary<string, Action>
@@ -1445,6 +1457,9 @@ namespace D4Automator
         public int MoveDelay { get; set; }
         public int PotionDelay { get; set; }
         public int DodgeDelay { get; set; }
+        public int HordesCircleSize { get; set; }
+        public double HordesCircleSpeed { get; set; }
+        public int HordesTimerInterval { get; set; }
 
         public string Skill1Action { get; set; }
         public string Skill2Action { get; set; }
@@ -1484,6 +1499,9 @@ namespace D4Automator
             MoveDelay = 100;
             PotionDelay = 5000;
             DodgeDelay = 1000;
+            HordesCircleSize = 255;
+            HordesCircleSpeed = 3;
+            HordesTimerInterval = 100;
         }
     }
 

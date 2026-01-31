@@ -46,6 +46,7 @@
             this.nudDodge = new System.Windows.Forms.NumericUpDown();
             this.lblInstructions = new System.Windows.Forms.Label();
             this.btnKeyConfig = new System.Windows.Forms.Button();
+            this.btnHordesConfig = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSkill2)).BeginInit();
@@ -348,21 +349,33 @@
     "n/key pressed.";
             // 
             // btnKeyConfig
-            // 
+            //
             this.btnKeyConfig.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnKeyConfig.Location = new System.Drawing.Point(180, 525);
+            this.btnKeyConfig.Location = new System.Drawing.Point(100, 525);
             this.btnKeyConfig.Name = "btnKeyConfig";
-            this.btnKeyConfig.Size = new System.Drawing.Size(134, 29);
+            this.btnKeyConfig.Size = new System.Drawing.Size(150, 29);
             this.btnKeyConfig.TabIndex = 18;
             this.btnKeyConfig.Text = "Configure Keys";
             this.btnKeyConfig.UseVisualStyleBackColor = true;
             this.btnKeyConfig.Click += new System.EventHandler(this.btnKeyConfig_Click);
-            // 
+            //
+            // btnHordesConfig
+            //
+            this.btnHordesConfig.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnHordesConfig.Location = new System.Drawing.Point(260, 525);
+            this.btnHordesConfig.Name = "btnHordesConfig";
+            this.btnHordesConfig.Size = new System.Drawing.Size(150, 29);
+            this.btnHordesConfig.TabIndex = 19;
+            this.btnHordesConfig.Text = "Hordes Config";
+            this.btnHordesConfig.UseVisualStyleBackColor = true;
+            this.btnHordesConfig.Click += new System.EventHandler(this.btnHordesConfig_Click);
+            //
             // MainForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(532, 579);
+            this.Controls.Add(this.btnHordesConfig);
             this.Controls.Add(this.btnKeyConfig);
             this.Controls.Add(this.lblInstructions);
             this.Controls.Add(this.nudDodge);
@@ -440,5 +453,6 @@
         private System.Windows.Forms.ToolStripMenuItem resetToDefaultsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.Button btnHordesConfig;
     }
 }
