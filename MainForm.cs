@@ -117,35 +117,42 @@ namespace D4Automator
 
         private void ControllerCheckTimer_Tick(object sender, EventArgs e)
         {
-            if (controller.IsConnected)
+            try
             {
-                var state = controller.GetState();
-
-                bool controllerMoved = IsControllerMoved(state);
-
-                if (controllerMoved)
+                if (controller.IsConnected)
                 {
-                    if (isRunning)
+                    var state = controller.GetState();
+
+                    bool controllerMoved = IsControllerMoved(state);
+
+                    if (controllerMoved)
                     {
-                        StopAutomation();
-                        wasAutomationRunning = true;
+                        if (isRunning)
+                        {
+                            StopAutomation();
+                            wasAutomationRunning = true;
+                        }
+                    }
+                    else if (wasAutomationRunning)
+                    {
+                        StartAutomation();
+                        wasAutomationRunning = false;
                     }
                 }
-                else if (wasAutomationRunning)
-                {
-                    StartAutomation();
-                    wasAutomationRunning = false;
-                }
+            }
+            catch (Exception)
+            {
+                // Ignore controller read errors to prevent crashes
             }
         }
 
         private bool IsControllerMoved(State state)
         {
-            // Check analog sticks
-            bool leftStickMoved = Math.Abs(state.Gamepad.LeftThumbX) > short.MaxValue * DEAD_ZONE ||
-                                  Math.Abs(state.Gamepad.LeftThumbY) > short.MaxValue * DEAD_ZONE;
-            bool rightStickMoved = Math.Abs(state.Gamepad.RightThumbX) > short.MaxValue * DEAD_ZONE ||
-                                   Math.Abs(state.Gamepad.RightThumbY) > short.MaxValue * DEAD_ZONE;
+            // Check analog sticks (cast to int to avoid overflow when value is short.MinValue)
+            bool leftStickMoved = Math.Abs((int)state.Gamepad.LeftThumbX) > short.MaxValue * DEAD_ZONE ||
+                                  Math.Abs((int)state.Gamepad.LeftThumbY) > short.MaxValue * DEAD_ZONE;
+            bool rightStickMoved = Math.Abs((int)state.Gamepad.RightThumbX) > short.MaxValue * DEAD_ZONE ||
+                                   Math.Abs((int)state.Gamepad.RightThumbY) > short.MaxValue * DEAD_ZONE;
 
             // Check digital pad
             bool dPadPressed = state.Gamepad.Buttons.HasFlag(GamepadButtonFlags.DPadUp) ||
