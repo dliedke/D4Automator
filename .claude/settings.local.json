@@ -6,7 +6,8 @@
       "Bash(dotnet build:*)",
       "Read(//mnt/c/Windows/Microsoft.NET/**)",
       "Bash(/mnt/c/Windows/Microsoft.NET/Framework/v4.0.30319/csc.exe:*)",
-      "Read(//mnt/c/Program Files (x86)/Microsoft Visual Studio/**)"
+      "Read(//mnt/c/Program Files (x86)/Microsoft Visual Studio/**)",
+      "Bash(git -C /c/GitLab/D4Automator log --oneline -20)"
     ],
     "deny": [],
     "ask": []
